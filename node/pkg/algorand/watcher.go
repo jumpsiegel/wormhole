@@ -3,24 +3,25 @@ package algorand
 import (
 	"context"
 	"encoding/hex"
-	"fmt"
-	"github.com/certusone/wormhole/node/pkg/p2p"
-	gossipv1 "github.com/certusone/wormhole/node/pkg/proto/gossip/v1"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"io/ioutil"
-	"net/http"
-	"time"
+//	"fmt"
+//	"github.com/certusone/wormhole/node/pkg/p2p"
+//	gossipv1 "github.com/certusone/wormhole/node/pkg/proto/gossip/v1"
+//	"github.com/prometheus/client_golang/prometheus/promauto"
+//	"io/ioutil"
+//	"net/http"
+//	"time"
 
 	"github.com/certusone/wormhole/node/pkg/common"
-	"github.com/certusone/wormhole/node/pkg/readiness"
-	"github.com/certusone/wormhole/node/pkg/supervisor"
+//	"github.com/certusone/wormhole/node/pkg/readiness"
+//	"github.com/certusone/wormhole/node/pkg/supervisor"
 	"github.com/certusone/wormhole/node/pkg/vaa"
 
-        "github.com/algorand/go-algorand-sdk"
+//	"github.com/algorand/go-algorand-sdk/client/algod"
+//	"github.com/algorand/go-algorand-sdk/client/kmd"
 
-	"github.com/gorilla/websocket"
-	"github.com/tidwall/gjson"
-	"go.uber.org/zap"
+//	"github.com/gorilla/websocket"
+//	"github.com/tidwall/gjson"
+//	"go.uber.org/zap"
 )
 
 type (
@@ -276,6 +277,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 //	case err := <-errC:
 //		return err
 //	}
+        return nil
 }
 
 // StringToAddress convert string into address
@@ -289,13 +291,14 @@ func StringToAddress(value string) (vaa.Address, error) {
 	return address, nil
 }
 
-// StringToHash convert string into transaction hash
-func StringToHash(value string) (eth_common.Hash, error) {
-	var hash eth_common.Hash
-	res, err := hex.DecodeString(value)
-	if err != nil {
-		return hash, err
-	}
-	copy(hash[:], res)
-	return hash, nil
-}
+//// StringToHash convert string into transaction hash
+//func StringToHash(value string) (eth_common.Hash, error) {
+//	var hash eth_common.Hash
+//	res, err := hex.DecodeString(value)
+//	if err != nil {
+//		return hash, err
+//	}
+//	copy(hash[:], res)
+//	return hash, nil
+//}
+//

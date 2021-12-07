@@ -2,10 +2,11 @@ package algorand
 
 import (
 	"context"
-	"encoding/json"
+//	"encoding/json"
 	"io/ioutil"
-	"time"
-        "github.com/algorand/go-algorand-sdk"
+//	"time"
+//	"github.com/algorand/go-algorand-sdk/client/algod"
+//	"github.com/algorand/go-algorand-sdk/client/kmd"
 	"github.com/certusone/wormhole/node/pkg/vaa"
 )
 
@@ -18,8 +19,8 @@ type submitVAAParams struct {
 }
 
 // SubmitVAA prepares transaction with signed VAA and sends it to the Algorand blockchain
-func SubmitVAA(ctx context.Context, urlLCD string, chainID string, contractAddress string, feePayer string, signed *vaa.VAA) (*client.TxResponse, error) {
-        return nil, nil
+func SubmitVAA(ctx context.Context, urlLCD string, chainID string, contractAddress string, feePayer string, signed *vaa.VAA) (string, error) {
+        return "", nil
 
 //	// Serialize VAA
 //	vaaBytes, err := signed.Marshal()

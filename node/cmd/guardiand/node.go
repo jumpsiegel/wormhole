@@ -138,9 +138,9 @@ func init() {
 	terraLCD = NodeCmd.Flags().String("terraLCD", "", "Path to LCD service root for http calls")
 	terraContract = NodeCmd.Flags().String("terraContract", "", "Wormhole contract address on Terra blockchain")
 
-	algorandRPC = NodeCmd.Flags().String("algoRPC", "", "Algorand RPC URL")
-	algorandToken = NodeCmd.Flags().String("algoToken", "", "Algorand access token")
-	algorandContract = NodeCmd.Flags().String("algoContract", "", "Algorand contract")
+	algorandRPC = NodeCmd.Flags().String("algorandRPC", "", "Algorand RPC URL")
+	algorandToken = NodeCmd.Flags().String("algorandToken", "", "Algorand access token")
+	algorandContract = NodeCmd.Flags().String("algorandContract", "", "Algorand contract")
 
 	solanaWsRPC = NodeCmd.Flags().String("solanaWS", "", "Solana Websocket URL (required")
 	solanaRPC = NodeCmd.Flags().String("solanaRPC", "", "Solana RPC URL (required")
