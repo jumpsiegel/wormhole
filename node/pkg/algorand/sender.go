@@ -36,7 +36,14 @@ func SubmitVAA(ctx context.Context, urlLCD string, chainID string, contractAddre
 //
 //	// Generate Address from Public Key
 //	addr := msg.AccAddress(tmKey.PubKey().Address())
-//
+
+
+//	algodClient, err := algod.MakeClient(algodAddress, algodToken)
+//	if err != nil {
+//		fmt.Printf("failed to make algod client: %s\n", err)
+//                return "", nil
+//	}
+
 //	// Create LCDClient
 //	LCDClient := client.NewLCDClient(
 //		urlLCD,
