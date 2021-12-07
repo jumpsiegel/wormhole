@@ -10,23 +10,17 @@ import (
 	"github.com/certusone/wormhole/node/pkg/vaa"
 )
 
-type submitVAAMsg struct {
-	Params submitVAAParams `json:"submit_v_a_a"`
-}
-
-type submitVAAParams struct {
-	VAA []byte `json:"vaa"`
-}
-
 // SubmitVAA prepares transaction with signed VAA and sends it to the Algorand blockchain
 func SubmitVAA(ctx context.Context, urlLCD string, chainID string, contractAddress string, feePayer string, signed *vaa.VAA) (string, error) {
-        return "", nil
 
-//	// Serialize VAA
+	// Serialize VAA
 //	vaaBytes, err := signed.Marshal()
 //	if err != nil {
 //		return nil, err
 //	}
+
+        return "", nil
+
 //
 //	// Derive Raw Private Key
 //	privKey, err := key.DerivePrivKey(feePayer, key.CreateHDPath(0, 0))
