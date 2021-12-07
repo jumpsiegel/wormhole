@@ -88,12 +88,14 @@ func (c ChainID) String() string {
 		return "solana"
 	case ChainIDEthereum:
 		return "ethereum"
-	case ChainIDTerra:
-		return "terra"
+	case ChainIDAlgorand:
+		return "algorand"
 	case ChainIDBSC:
 		return "bsc"
 	case ChainIDPolygon:
 		return "polygon"
+	case ChainIDTerra:
+		return "terra"
 	case ChainIDEthereumRopsten:
 		return "ethereum-ropsten"
 	default:
@@ -109,12 +111,14 @@ func ChainIDFromString(s string) (ChainID, error) {
 		return ChainIDSolana, nil
 	case "ethereum":
 		return ChainIDEthereum, nil
-	case "terra":
-		return ChainIDTerra, nil
+	case "algorand":
+		return ChainIDAlgorand, nil
 	case "bsc":
 		return ChainIDBSC, nil
 	case "polygon":
 		return ChainIDPolygon, nil
+	case "terra":
+		return ChainIDTerra, nil
 	case "ethereum-ropsten":
 		return ChainIDEthereumRopsten, nil
 	default:
@@ -134,6 +138,8 @@ const (
 	ChainIDBSC ChainID = 4
 	// ChainIDPolygon is the ChainID of Polygon
 	ChainIDPolygon ChainID = 5
+	// ChainIDAlgorand is the ChainID of Algorand
+	ChainIDAlgorand ChainID = 6
 	// ChainIDEthereumRopsten is the ChainID of Ethereum Ropsten
 	ChainIDEthereumRopsten ChainID = 10001
 
