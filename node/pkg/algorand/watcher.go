@@ -12,8 +12,8 @@ import (
 //	"time"
 
 	"github.com/certusone/wormhole/node/pkg/common"
-//	"github.com/certusone/wormhole/node/pkg/readiness"
-//	"github.com/certusone/wormhole/node/pkg/supervisor"
+	"github.com/certusone/wormhole/node/pkg/readiness"
+	"github.com/certusone/wormhole/node/pkg/supervisor"
 	"github.com/certusone/wormhole/node/pkg/vaa"
 
 //	"github.com/algorand/go-algorand-sdk/client/algod"
@@ -21,7 +21,7 @@ import (
 
 //	"github.com/gorilla/websocket"
 //	"github.com/tidwall/gjson"
-//	"go.uber.org/zap"
+	"go.uber.org/zap"
 )
 
 type (
@@ -81,7 +81,9 @@ func (e *Watcher) Run(ctx context.Context) error {
 //	})
 //
 //	errC := make(chan error)
-//	logger := supervisor.Logger(ctx)
+	logger := supervisor.Logger(ctx)
+	logger.Info("connecting to algorand RPC", zap.String("url", e.urlRPC))
+
 //
 //	logger.Info("connecting to websocket", zap.String("url", e.urlWS))
 //
@@ -117,8 +119,8 @@ func (e *Watcher) Run(ctx context.Context) error {
 //	}
 //	logger.Info("subscribed to new transaction events")
 //
-//	readiness.SetReady(common.ReadinessAlgorandSyncing)
-//
+	readiness.SetReady(common.ReadinessAlgorandSyncing)
+
 //	go func() {
 //		t := time.NewTicker(5 * time.Second)
 //		client := &http.Client{
