@@ -88,14 +88,14 @@ func (c ChainID) String() string {
 		return "solana"
 	case ChainIDEthereum:
 		return "ethereum"
-	case ChainIDAlgorand:
-		return "algorand"
+	case ChainIDTerra:
+		return "terra"
 	case ChainIDBSC:
 		return "bsc"
 	case ChainIDPolygon:
 		return "polygon"
-	case ChainIDTerra:
-		return "terra"
+	case ChainIDAlgorand:
+		return "algorand"
 	case ChainIDEthereumRopsten:
 		return "ethereum-ropsten"
 	default:
@@ -111,14 +111,14 @@ func ChainIDFromString(s string) (ChainID, error) {
 		return ChainIDSolana, nil
 	case "ethereum":
 		return ChainIDEthereum, nil
-	case "algorand":
-		return ChainIDAlgorand, nil
+	case "terra":
+		return ChainIDTerra, nil
 	case "bsc":
 		return ChainIDBSC, nil
 	case "polygon":
 		return ChainIDPolygon, nil
-	case "terra":
-		return ChainIDTerra, nil
+	case "algorand":
+		return ChainIDAlgorand, nil
 	case "ethereum-ropsten":
 		return ChainIDEthereumRopsten, nil
 	default:
