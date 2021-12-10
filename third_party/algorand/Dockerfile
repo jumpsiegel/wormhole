@@ -6,6 +6,9 @@ ADD template.json /setup/
 ADD setup.sh /setup/
 ADD setup.py /setup/
 ADD requirements.txt /setup/
+ADD vaa-verify.teal /setup/
+ADD vaa-processor-clear.teal /setup/
+ADD vaa-processor-approval.teal /setup/
 
 RUN ./goal network create -n sandnet -r /network -t /setup/template.json && echo rawr
 
