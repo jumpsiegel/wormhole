@@ -176,14 +176,18 @@ class Setup:
         return balances
 
     def setup(self):
-        client = self.getAlgodClient()
+        self.client = self.getAlgodClient()
 
-        target = self.getTargetAccount()
-
-        b = self.getBalances(client, target.getAddress())
+        self.target = self.getTargetAccount()
+        
+        b = self.getBalances(self.client, self.target.getAddress())
         if (b[0] < 100000000):
             print("Account needs money... funding it")
-            self.fundTargetAccount(client, target)
-        print(self.getBalances(client, target.getAddress()))
+            self.fundTargetAccount(self.client, self.target)
+        print(self.getBalances(self.client, self.target.getAddress()))
+
+    def deploy(self):
+        pass
+        
 s = Setup()
 s.setup()
