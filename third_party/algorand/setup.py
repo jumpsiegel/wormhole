@@ -9,6 +9,7 @@ from algosdk.v2client.algod import AlgodClient
 from algosdk.kmd import KMDClient
 from algosdk import account, mnemonic
 from algosdk.future import transaction
+from algosdk.encoding import decode_address
 from pyteal import compileTeal, Mode, Expr
 from pyteal import *
 from algosdk.logic import get_application_address
@@ -186,8 +187,63 @@ class Setup:
             self.fundTargetAccount(self.client, self.target)
         print(self.getBalances(self.client, self.target.getAddress()))
 
+
     def deploy(self):
-        pass
+        vaa_processor_approval = self.client.compile(open("vaa-processor-approval.teal", "r").read())
+        vaa_processor_clear = self.client.compile(open("vaa-processor-clear.teal", "r").read())
+        vaa_verify = self.client.compile(open("vaa-verify.teal", "r").read())
+        verify_hash = vaa_verify['hash']
+        print("verify_hash " + verify_hash + " " + str(len(decode_address(verify_hash))))
+
+        globalSchema = transaction.StateSchema(num_uints=4, num_byte_slices=20)
+        localSchema = transaction.StateSchema(num_uints=0, num_byte_slices=0)
+    
+        app_args = [ "beFA429d57cD18b7F8A4d91A2da9AB4AF05d0FBe", 0, 0 ]
+        #app_args = [  ]
+    
+        txn = transaction.ApplicationCreateTxn(
+            sender=self.target.getAddress(),
+            on_complete=transaction.OnComplete.NoOpOC,
+            approval_program=b64decode(vaa_processor_approval["result"]),
+            clear_program=b64decode(vaa_processor_clear["result"]),
+            global_schema=globalSchema,
+            local_schema=localSchema,
+            app_args=app_args,
+            sp=self.client.suggested_params(),
+        )
+    
+        signedTxn = txn.sign(self.target.getPrivateKey())
+        self.client.send_transaction(signedTxn)
+        response = self.waitForTransaction(self.client, signedTxn.get_txid())
+        assert response.applicationIndex is not None and response.applicationIndex > 0
+        print("app_id: ", response.applicationIndex)
+
+        appAddr = get_application_address(response.applicationIndex)
+        suggestedParams = self.client.suggested_params()
+        appCallTxn = transaction.ApplicationCallTxn(
+            sender=self.target.getAddress(),
+            index=response.applicationIndex,
+            on_complete=transaction.OnComplete.NoOpOC,
+            app_args=[b"setvphash", decode_address(verify_hash)],
+            sp=suggestedParams,
+        )
+
+        signedAppCallTxn = appCallTxn.sign(self.target.getPrivateKey())
+        self.client.send_transactions([signedAppCallTxn])
+        response = self.waitForTransaction(self.client, appCallTxn.get_txid())
+        print("set the vp hash")
+
+        appCallTxn = transaction.PaymentTxn(
+            sender=self.target.getAddress(),
+            receiver=decode_address(verify_hash),
+            amt=500000,
+            sp=suggestedParams,
+        )
+        signedAppCallTxn = appCallTxn.sign(self.target.getPrivateKey())
+        self.client.send_transactions([signedAppCallTxn])
+        response = self.waitForTransaction(self.client, appCallTxn.get_txid())
+        print("funded the vp hash")
         
 s = Setup()
 s.setup()
+s.deploy()
