@@ -199,7 +199,6 @@ class Setup:
         localSchema = transaction.StateSchema(num_uints=0, num_byte_slices=0)
     
         app_args = [ "beFA429d57cD18b7F8A4d91A2da9AB4AF05d0FBe", 0, 0 ]
-        #app_args = [  ]
     
         txn = transaction.ApplicationCreateTxn(
             sender=self.target.getAddress(),
@@ -231,18 +230,18 @@ class Setup:
         signedAppCallTxn = appCallTxn.sign(self.target.getPrivateKey())
         self.client.send_transactions([signedAppCallTxn])
         response = self.waitForTransaction(self.client, appCallTxn.get_txid())
-        print("set the vp hash")
+        print("set the vp hash to the stateless contract")
 
         appCallTxn = transaction.PaymentTxn(
             sender=self.target.getAddress(),
-            receiver=decode_address(verify_hash),
+            receiver=verify_hash,
             amt=500000,
             sp=suggestedParams,
         )
         signedAppCallTxn = appCallTxn.sign(self.target.getPrivateKey())
         self.client.send_transactions([signedAppCallTxn])
         response = self.waitForTransaction(self.client, appCallTxn.get_txid())
-        print("funded the vp hash")
+        print("funded the stateless contract")
         
 s = Setup()
 s.setup()
