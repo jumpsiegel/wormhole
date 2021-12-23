@@ -8,6 +8,7 @@ import hashlib
 from algosdk.v2client.algod import AlgodClient
 from algosdk.kmd import KMDClient
 from algosdk import account, mnemonic
+from algosdk.encoding import decode_address
 from algosdk.future import transaction
 from pyteal import compileTeal, Mode, Expr
 from pyteal import *
@@ -169,7 +170,8 @@ class TEST1:
         teal = compileTeal(contract, mode=Mode.Application, version=5)
         response = client.compile(teal)
         r = b64decode(response["result"])
-        return [r, self.hashy(r)]
+        assert self.hashy( bytes("Program", 'utf-8') + r) == decode_address(response["hash"])
+        return [r, decode_address(response["hash"])]
 
     def read_state(self, client, addr, app_id):
         results = client.account_info(addr)
@@ -214,7 +216,7 @@ class TEST1:
             )
 
             on_update = Seq(
-                Assert(Sha512_256(Txn.approval_program()) == App.globalGet(validUpdateHash)),
+                Assert(Sha512_256(Concat(Bytes("Program"), Txn.approval_program())) == App.globalGet(validUpdateHash)),
                 Return(Int(1))
             )
 
@@ -270,7 +272,7 @@ class TEST1:
             )
 
             on_update = Seq(
-                Assert(Sha512_256(Txn.approval_program()) == App.globalGet(validUpdateHash)),
+                Assert(Sha512_256(Concat(Bytes("Program"), Txn.approval_program())) == App.globalGet(validUpdateHash)),
                 Approve(),
             )
 
