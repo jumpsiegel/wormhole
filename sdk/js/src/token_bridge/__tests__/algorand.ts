@@ -1,7 +1,7 @@
 import { parseUnits } from "@ethersproject/units";
 import { NodeHttpTransport } from "@improbable-eng/grpc-web-node-http-transport";
 import { describe, expect, jest, test } from "@jest/globals";
-var base32 = require('base32');
+import { base32 } from "rfc4648";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   Token,
@@ -116,7 +116,7 @@ describe("Integration Tests", () => {
               transport: NodeHttpTransport(),
             }
           );
-          console.log(base32.encode(signedVAA));
+          console.log(base32.stringify(signedVAA));
           // create a signer for Eth
           const provider = new ethers.providers.WebSocketProvider(ETH_NODE_URL);
           const signer = new ethers.Wallet(ETH_PRIVATE_KEY, provider);
