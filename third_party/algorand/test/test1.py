@@ -21,7 +21,7 @@ class Account:
     def __init__(self, privateKey: str) -> None:
         self.sk = privateKey
         self.addr = account.address_from_private_key(privateKey)
-        print (privateKey + " -> " + self.getMnemonic())
+        # print (privateKey + " -> " + self.getMnemonic())
 
     def getAddress(self) -> str:
         return self.addr
@@ -183,6 +183,12 @@ class TEST1:
                 App.globalPut(validUpdateHash, Bytes("")),
                 Return(Int(1))
             )
+
+            # In a real world case, this would also 
+            #   1) set the clear 
+            #   2) check some byzatine voting rules from the governance body to see if we should be allowed to 
+            #      update this hash
+            #   3) Remember the fact that we have executed this governance action so that we cannot replay it later
 
             on_sethash = Seq(
                 App.globalPut(validUpdateHash, Txn.application_args[1]), 
