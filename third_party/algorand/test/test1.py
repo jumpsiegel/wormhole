@@ -12,6 +12,7 @@ from algosdk.future import transaction
 from pyteal import compileTeal, Mode, Expr
 from pyteal import *
 from algosdk.logic import get_application_address
+from Cryptodome.Hash import SHA512
 
 import pprint
 
@@ -210,7 +211,7 @@ class TEST1:
             )
 
             on_update = Seq(
-                Assert(Sha256(Txn.approval_program()) == App.globalGet(validUpdateHash)),
+                Assert(Sha512_256(Txn.approval_program()) == App.globalGet(validUpdateHash)),
                 Return(Int(1))
             )
 
@@ -266,7 +267,7 @@ class TEST1:
             )
 
             on_update = Seq(
-                Assert(Sha256(Txn.approval_program()) == App.globalGet(validUpdateHash)),
+                Assert(Sha512_256(Txn.approval_program()) == App.globalGet(validUpdateHash)),
                 Approve(),
             )
 
