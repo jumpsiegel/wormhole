@@ -160,13 +160,16 @@ class TEST1:
     def getAlgodClient(self) -> AlgodClient:
         return AlgodClient(self.ALGOD_TOKEN, self.ALGOD_ADDRESS)
 
+    def hashy(self, method: str) -> Bytes:
+        chksum = SHA512.new(truncate="256")
+        chksum.update(method)
+        return chksum.digest()
+
     def fullyCompileContract(self, client: AlgodClient, contract: Expr) -> bytes:
         teal = compileTeal(contract, mode=Mode.Application, version=5)
         response = client.compile(teal)
         r = b64decode(response["result"])
-        m = hashlib.sha256()
-        m.update(r)
-        return [r, m.digest()]
+        return [r, self.hashy(r)]
 
     def read_state(self, client, addr, app_id):
         results = client.account_info(addr)
