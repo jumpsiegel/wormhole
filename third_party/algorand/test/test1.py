@@ -420,5 +420,6 @@ class TEST1:
 
         self.updateTEST1App(client=client, sender=player1, appid=appID)
 
-test1 = TEST1()
-test1.simple_test1()
+if __name__ == "__main__":
+    test1 = TEST1()
+    test1.simple_test1()
