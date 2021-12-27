@@ -7,12 +7,11 @@ from vaa_processor import vaa_processor_program
 from vaa_processor import vaa_processor_clear
 from vaa_verify import vaa_verify_program
 
-from test1 import *
+from setup import *
 
-class TEST2(TEST1):
+class TEST2(Setup):
     def __init__(self) -> None:
         super().__init__()
-
 
     def simple_test2(self):
         print("simple test2")

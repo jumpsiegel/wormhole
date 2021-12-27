@@ -5,9 +5,11 @@ RUN mkdir -p /setup
 ADD template.json /setup/
 ADD setup.sh /setup/
 ADD setup.py /setup/
-ADD teal/vaa-verify.teal /setup/
-ADD teal/vaa-processor-clear.teal /setup/
-ADD teal/vaa-processor-approval.teal /setup/
+ADD globals.py /setup/
+ADD inlineasm.py /setup/
+ADD util.py /setup/
+ADD vaa_verify.py /setup/
+ADD vaa_processor.py /setup/
 
 RUN ./goal network create -n sandnet -r /network -t /setup/template.json && echo rawr
 

@@ -16,6 +16,12 @@ from pyteal import compileTeal, Mode, Expr
 from pyteal import *
 from algosdk.logic import get_application_address
 
+from vaa_processor import vaa_processor_program
+from vaa_processor import vaa_processor_clear
+from vaa_verify import vaa_verify_program
+
+from Cryptodome.Hash import SHA512
+
 import pprint
 
 class Account:
@@ -187,11 +193,40 @@ class Setup:
 
         #print(self.getBalances(self.client, self.target.getAddress()))
 
+    def hashy(self, method: str) -> Bytes:
+        chksum = SHA512.new(truncate="256")
+        chksum.update(method)
+        return chksum.digest()
+
+    def fullyCompileContract(self, client: AlgodClient, contract: Expr, mode) -> bytes:
+        teal = compileTeal(contract, mode=mode, version=5)
+        response = client.compile(teal)
+        r = b64decode(response["result"])
+        assert self.hashy( bytes("Program", 'utf-8') + r) == decode_address(response["hash"])
+#        return [r, decode_address(response["hash"])]
+        return [r, response["hash"]]
+
+    def test_compile(self):
+        self.client = self.getAlgodClient()
+        self.target = self.getTargetAccount()
+
+        APPROVAL_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_program(), Mode.Application)
+        CLEAR_STATE_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_clear(), Mode.Application)
+        VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(int(0)), Mode.Signature)
+
     def devnet_deploy(self):
-        vaa_processor_approval = self.client.compile(open(args.teal_dir + "/" + args.approval, "r").read())
-        vaa_processor_clear = self.client.compile(open(args.teal_dir + "/" + args.clear, "r").read())
-        vaa_verify = self.client.compile(open(args.teal_dir + "/" + args.verify, "r").read())
-        verify_hash = vaa_verify['hash']
+        from vaa_processor import vaa_processor_program
+        from vaa_processor import vaa_processor_clear
+        from vaa_verify import vaa_verify_program
+
+        APPROVAL_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_program(), Mode.Application)
+        CLEAR_STATE_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_clear(), Mode.Application)
+        VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(int(0)), Mode.Signature)
+
+        vaa_processor_approval = APPROVAL_PROGRAM[0]
+        vaa_processor_clear = CLEAR_STATE_PROGRAM[0]
+        vaa_verify = VERIFY_PROGRAM[0]
+        verify_hash = VERIFY_PROGRAM[1]
         print("verify_hash " + verify_hash + " " + str(len(decode_address(verify_hash))))
 
         globalSchema = transaction.StateSchema(num_uints=4, num_byte_slices=20)
@@ -203,8 +238,8 @@ class Setup:
             txn = transaction.ApplicationCreateTxn(
                 sender=self.target.getAddress(),
                 on_complete=transaction.OnComplete.NoOpOC,
-                approval_program=b64decode(vaa_processor_approval["result"]),
-                clear_program=b64decode(vaa_processor_clear["result"]),
+                approval_program=vaa_processor_approval,
+                clear_program=vaa_processor_clear,
                 global_schema=globalSchema,
                 local_schema=localSchema,
                 app_args=app_args,
@@ -214,8 +249,8 @@ class Setup:
             txn = transaction.ApplicationUpdateTxn(
                 sender=self.target.getAddress(),
                 index=args.appid,
-                approval_program=b64decode(vaa_processor_approval["result"]),
-                clear_program=b64decode(vaa_processor_clear["result"]),
+                approval_program=vaa_processor_approval,
+                clear_program=vaa_processor_clear,
                 app_args=app_args,
                 sp=self.client.suggested_params(),
             )
@@ -329,6 +364,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--appid', type=int, help='setup devnet')
     parser.add_argument('--devnet', action='store_true', help='setup devnet')
+    parser.add_argument('--compile', action='store_true', help='test compile')
     parser.add_argument('--test', action='store_true', help='test devnet')
     parser.add_argument('--print', action='store_true', help='print')
 
@@ -338,6 +374,11 @@ if __name__ == "__main__":
         s = Setup(args)
         s.setup()
         s.devnet_deploy()
+        sys.exit(0)
+
+    if args.compile:
+        s = Setup(args)
+        s.test_compile()
         sys.exit(0)
 
     if args.test:
