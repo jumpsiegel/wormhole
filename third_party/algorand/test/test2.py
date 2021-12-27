@@ -28,10 +28,6 @@ class TEST2(Setup):
         response = self.waitForTransaction(self.client, appCallTxn.get_txid())
         pprint.pprint(response.__dict__)
 
-if __name__ == "__main__":
-    test2 = TEST2()
-    test2.main()
-
 #   async publish (data: PythData): Promise<PublishInfo> {
 #     const publishInfo: PublishInfo = { status: StatusCode.OK }
 # 
@@ -134,3 +130,8 @@ if __name__ == "__main__":
 #      return tx.txID()
 #    }
 #  }
+
+if __name__ == "__main__":
+    test2 = TEST2()
+    test2.main()
+
