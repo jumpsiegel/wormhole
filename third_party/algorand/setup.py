@@ -64,18 +64,18 @@ class PendingTxnResponse:
         self.logs: List[bytes] = [b64decode(l) for l in response.get("logs", [])]
 
 class Setup:
-    def __init__(self, args) -> None:
-        self.args = args
-        self.ALGOD_ADDRESS = args.algod_address
-        self.ALGOD_TOKEN = args.algod_token
+    def __init__(self) -> None:
+        self.args = None
+        self.ALGOD_ADDRESS = None
+        self.ALGOD_TOKEN = None
         self.FUNDING_AMOUNT = 100_000_000
 
-        self.KMD_ADDRESS = args.kmd_address
-        self.KMD_TOKEN = args.kmd_token
-        self.KMD_WALLET_NAME = args.kmd_name
-        self.KMD_WALLET_PASSWORD = args.kmd_password
+        self.KMD_ADDRESS = None
+        self.KMD_TOKEN = None
+        self.KMD_WALLET_NAME = None
+        self.KMD_WALLET_PASSWORD = None
 
-        self.TARGET_ACCOUNT = args.mnemonic
+        self.TARGET_ACCOUNT = None
 
         self.kmdAccounts : Optional[List[Account]] = None
 
@@ -83,6 +83,81 @@ class Setup:
 
         self.APPROVAL_PROGRAM = b""
         self.CLEAR_STATE_PROGRAM = b""
+
+    def init(self, args) -> None:
+        self.args = args
+        self.ALGOD_ADDRESS = args.algod_address
+        self.ALGOD_TOKEN = args.algod_token
+        self.KMD_ADDRESS = args.kmd_address
+        self.KMD_TOKEN = args.kmd_token
+        self.KMD_WALLET_NAME = args.kmd_name
+        self.KMD_WALLET_PASSWORD = args.kmd_password
+        self.TARGET_ACCOUNT = args.mnemonic
+
+    def main(self) -> None:
+        parser = argparse.ArgumentParser(description='algorand setup')
+    
+        parser.add_argument('--algod_address', type=str, help='algod address (default: http://localhost:4001)', 
+                            default="http://localhost:4001")
+        parser.add_argument('--algod_token', type=str, help='algod access token', 
+                            default="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        parser.add_argument('--kmd_address', type=str, help='kmd wallet address (default: http://localhost:4002)',
+                            default="http://localhost:4002")
+        parser.add_argument('--kmd_token', type=str, help='kmd wallet access token', 
+                            default="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        parser.add_argument('--kmd_name', type=str, help='kmd wallet name', 
+                            default="unencrypted-default-wallet")
+        parser.add_argument('--kmd_password', type=str, help='kmd wallet password', default="")
+    
+        parser.add_argument('--approval', type=str, help='vaa approval teal', default="vaa-processor-approval.teal")
+        parser.add_argument('--clear', type=str, help='vaa clear teal', default="vaa-processor-clear.teal")
+        parser.add_argument('--verify', type=str, help='vaa verify teal', default="vaa-verify.teal")
+        parser.add_argument('--teal_dir', type=str, help='where to find the teal files', default=".")
+    
+        # This is the devnet mnemonic...
+        parser.add_argument('--mnemonic', type=str, help='account mnemonic', 
+                            default="assault approve result rare float sugar power float soul kind galaxy edit unusual pretty tone tilt net range pelican avoid unhappy amused recycle abstract master")
+    
+        parser.add_argument('--appid', type=int, help='setup devnet')
+        parser.add_argument('--devnet', action='store_true', help='setup devnet')
+        parser.add_argument('--compile', action='store_true', help='test compile')
+        parser.add_argument('--test', action='store_true', help='test devnet')
+        parser.add_argument('--print', action='store_true', help='print')
+    
+        args = parser.parse_args()
+        s = self
+    
+        if args.devnet:
+            self.init(args)
+            s.setup()
+            s.devnet_deploy()
+            sys.exit(0)
+    
+        if args.compile:
+            self.init(args)
+            s.test_compile()
+            sys.exit(0)
+    
+        if args.test:
+            if args.appid == None:
+                print("you need to specify the appid when testing")
+                sys.exit(-1)
+            self.init(args)
+            s.setup()
+            s.test(args)
+            sys.exit(0)
+    
+        if args.print:
+            if args.appid == None:
+                print("you need to specify the appid when testing")
+                sys.exit(-1)
+            self.init(args)
+            s.setup()
+            s.printState(args)
+            sys.exit(0)
+    
+        print("use --help to see what you can do")
+        sys.exit(-1)
 
     def waitForTransaction(
             self, client: AlgodClient, txID: str, timeout: int = 10
@@ -234,7 +309,7 @@ class Setup:
     
         app_args = [ bytes.fromhex("beFA429d57cD18b7F8A4d91A2da9AB4AF05d0FBe"), 86400, 0 ]
 
-        if args.appid == None:
+        if self.args.appid == None:
             txn = transaction.ApplicationCreateTxn(
                 sender=self.target.getAddress(),
                 on_complete=transaction.OnComplete.NoOpOC,
@@ -248,7 +323,7 @@ class Setup:
         else:
             txn = transaction.ApplicationUpdateTxn(
                 sender=self.target.getAddress(),
-                index=args.appid,
+                index=self.args.appid,
                 approval_program=vaa_processor_approval,
                 clear_program=vaa_processor_clear,
                 app_args=app_args,
@@ -259,10 +334,10 @@ class Setup:
         self.client.send_transaction(signedTxn)
         response = self.waitForTransaction(self.client, signedTxn.get_txid())
         
-        if args.appid == None:
+        if self.args.appid == None:
             assert response.applicationIndex is not None and response.applicationIndex > 0
         else:
-            response.applicationIndex = args.appid
+            response.applicationIndex = self.args.appid
             pprint.pprint(response.__dict__)
         print("app_id: ", response.applicationIndex)
         appAddr = get_application_address(response.applicationIndex)
@@ -339,65 +414,5 @@ class Setup:
         pprint.pprint(response.__dict__)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='algorand setup')
-
-    parser.add_argument('--algod_address', type=str, help='algod address (default: http://localhost:4001)', 
-                        default="http://localhost:4001")
-    parser.add_argument('--algod_token', type=str, help='algod access token', 
-                        default="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    parser.add_argument('--kmd_address', type=str, help='kmd wallet address (default: http://localhost:4002)',
-                        default="http://localhost:4002")
-    parser.add_argument('--kmd_token', type=str, help='kmd wallet access token', 
-                        default="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    parser.add_argument('--kmd_name', type=str, help='kmd wallet name', 
-                        default="unencrypted-default-wallet")
-    parser.add_argument('--kmd_password', type=str, help='kmd wallet password', default="")
-
-    parser.add_argument('--approval', type=str, help='vaa approval teal', default="vaa-processor-approval.teal")
-    parser.add_argument('--clear', type=str, help='vaa clear teal', default="vaa-processor-clear.teal")
-    parser.add_argument('--verify', type=str, help='vaa verify teal', default="vaa-verify.teal")
-    parser.add_argument('--teal_dir', type=str, help='where to find the teal files', default=".")
-
-    # This is the devnet mnemonic...
-    parser.add_argument('--mnemonic', type=str, help='account mnemonic', 
-                        default="assault approve result rare float sugar power float soul kind galaxy edit unusual pretty tone tilt net range pelican avoid unhappy amused recycle abstract master")
-
-    parser.add_argument('--appid', type=int, help='setup devnet')
-    parser.add_argument('--devnet', action='store_true', help='setup devnet')
-    parser.add_argument('--compile', action='store_true', help='test compile')
-    parser.add_argument('--test', action='store_true', help='test devnet')
-    parser.add_argument('--print', action='store_true', help='print')
-
-    args = parser.parse_args()
-
-    if args.devnet:
-        s = Setup(args)
-        s.setup()
-        s.devnet_deploy()
-        sys.exit(0)
-
-    if args.compile:
-        s = Setup(args)
-        s.test_compile()
-        sys.exit(0)
-
-    if args.test:
-        if args.appid == None:
-            print("you need to specify the appid when testing")
-            sys.exit(-1)
-        s = Setup(args)
-        s.setup()
-        s.test(args)
-        sys.exit(0)
-
-    if args.print:
-        if args.appid == None:
-            print("you need to specify the appid when testing")
-            sys.exit(-1)
-        s = Setup(args)
-        s.setup()
-        s.printState(args)
-        sys.exit(0)
-
-    print("use --help to see what you can do")
-    sys.exit(-1)
+    s = Setup()
+    s.main()
