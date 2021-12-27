@@ -218,7 +218,7 @@ def setvphash():
     ])
 
 
-def verify():
+def parseAndVerifyVM():
     # * Sender must be stateless logic.
     # * Let N be the number of signatures per verification step, for the TX(i) in group, we verify signatures [j..k] where j = i*N, k = j+(N-1)
     # * Argument 0 must contain guardian public keys for guardians [i..j] (read by stateless logic).
@@ -242,8 +242,7 @@ def verify():
         If(Txn.group_index() == Global.group_size() -
            Int(1)).Then(
             Return(Seq([
-                Assert(check_final_verification_state()),
-                commit_vaa()
+                Assert(check_final_verification_state())
             ]))),
         Approve()])
 
@@ -253,8 +252,7 @@ def vaa_processor_program():
     handle_delete = Return(is_creator())
     handle_noop = Cond(
         [METHOD == Bytes("setvphash"), setvphash()],
-        [METHOD == Bytes("verify"), verify()],
-#        [METHOD == Bytes("parseAndVerifyVM"), parseAndVerifyVM()],
+        [METHOD == Bytes("parseAndVerifyVM"), parseAndVerifyVM()],
     )
     return Cond(
         [Txn.application_id() == Int(0), handle_create],
