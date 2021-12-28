@@ -283,6 +283,35 @@ async function readAppGlobalStateByKey(
 //  }
 //}
 
+function addVerifyTx(
+  sender: any,
+  params: any,
+  payload: any,
+  gksubset: any,
+  totalguardians: any
+) {
+  const appArgs = [];
+  appArgs.push(
+    new Uint8Array(Buffer.from("verify")),
+    new Uint8Array(Buffer.from(gksubset.join(""), "hex")),
+    algosdk.encodeUint64(parseInt(totalguardians))
+  );
+
+  const tx = algosdk.makeApplicationNoOpTxn(
+    sender,
+    params,
+    this.appId,
+    appArgs,
+    undefined,
+    undefined,
+    undefined,
+    new Uint8Array(payload)
+  );
+  this.groupTx.push(tx);
+
+  return tx.txID();
+}
+
 async function publish(
   tokenBridgeAddress: string,
   provider: algosdk.Algodv2,
@@ -331,7 +360,7 @@ async function publish(
   const buf = Buffer.alloc(8);
   for (let i = 0; i < guardianCount; i++) {
     buf.writeBigUInt64BE(BigInt(i++));
-    guardianKeys.push( globalStateLookupKey(globalState, buf.toString()));
+    guardianKeys.push(globalStateLookupKey(globalState, buf.toString()));
   }
 
   const groupTx = [];
@@ -345,11 +374,26 @@ async function publish(
       st,
       i < numOfVerifySteps - 1 ? st + stepSize : undefined
     );
-    // sigSubsets.push(data.signatures.slice(i * sigSetLen, i < this.numOfVerifySteps - 1 ? ((i * sigSetLen) + sigSetLen) : undefined))
-    //        this.pclib.addVerifyTx(gid, this.compiledVerifyProgram.hash, txParams, data.vaaBody, keySubset, this.guardianCount)
+
+    const signatures = signedVAA.slice(6);
+
+    sigSubsets.push(
+      signatures.slice(
+        i * sigSetLen,
+        i < numOfVerifySteps - 1 ? i * sigSetLen + sigSetLen : undefined
+      )
+    );
+    addVerifyTx(
+      gid,
+      this.compiledVerifyProgram.hash,
+      txParams,
+      data.vaaBody,
+      keySubset,
+      guardianCount
+    );
   }
   //      this.pclib.addPriceStoreTx(gid, this.vaaProcessorOwner, txParams, data.symbol, data.vaaBody.slice(51))
-  //        const txId = await this.pclib.commitVerifyTxGroup(gid, this.compiledVerifyProgram.bytes, sigSubsets, this.vaaProcessorOwner, this.signCallback.bind(this))
+  // const txId = await this.pclib.commitVerifyTxGroup(gid, this.compiledVerifyProgram.bytes, sigSubsets, this.vaaProcessorOwner, this.signCallback.bind(this))
   //      publishInfo.txid = txId
   //    } catch (e: any) {
   //      publishInfo.status = StatusCode.ERROR_SUBMIT_MESSAGE
