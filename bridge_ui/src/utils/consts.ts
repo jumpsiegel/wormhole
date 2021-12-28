@@ -137,7 +137,7 @@ export const CHAINS =
         },
       ];
 export const BETA_CHAINS: ChainId[] =
-  CLUSTER === "mainnet" ? [CHAIN_ID_AVAX, CHAIN_ID_OASIS] : [];
+  CLUSTER === "mainnet" ? [CHAIN_ID_OASIS] : [];
 export const CHAINS_WITH_NFT_SUPPORT = CHAINS.filter(
   ({ id }) =>
     id === CHAIN_ID_AVAX ||
@@ -159,11 +159,6 @@ export const COMING_SOON_CHAINS = [
     id: CHAIN_ID_OASIS,
     name: "Oasis",
     logo: oasisIcon,
-  },
-  {
-    id: CHAIN_ID_AVAX,
-    name: "Avalanche",
-    logo: avaxIcon,
   },
 ];
 export const getDefaultNativeCurrencySymbol = (chainId: ChainId) =>
@@ -810,9 +805,9 @@ export const TERRA_FCD_BASE =
     : "http://localhost:3060";
 export const TERRA_GAS_PRICES_URL = `${TERRA_FCD_BASE}/v1/txs/gas_prices`;
 
-export const TOTAL_TRANSACTIONS_WORMHOLE = `https://europe-west3-wormhole-315720.cloudfunctions.net/mainnet/totals?groupBy=address`;
+export const TOTAL_TRANSACTIONS_WORMHOLE = `https://europe-west3-wormhole-315720.cloudfunctions.net/mainnet-totals?groupBy=address`;
 
-export const RECENT_TRANSACTIONS_WORMHOLE = `https://europe-west3-wormhole-315720.cloudfunctions.net/mainnet/recent?groupBy=address&numRows=2`;
+export const RECENT_TRANSACTIONS_WORMHOLE = `https://europe-west3-wormhole-315720.cloudfunctions.net/mainnet-recent?groupBy=address&numRows=2`;
 
 export const VAA_EMITTER_ADDRESSES = [
   `${CHAIN_ID_SOLANA}:ec7372995d5cc8732397fb0ad35c0121e0eaa90d26f828a534cab54391b3a4f5`, //SOLANA TOKEN
