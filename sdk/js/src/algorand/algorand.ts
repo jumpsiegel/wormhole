@@ -1,4 +1,6 @@
-// npx prettier --write .
+// (cd src/algorand; npx prettier --write .)
+// npm ci --prefix sdk/js
+// npm test
 
 import algosdk from "algosdk";
 
@@ -46,7 +48,7 @@ const ALGORAND_ADDRESS_SIZE = 58;
 //  return bytes
 //}
 //
-function addressFromByteBuffer(addr: any) {
+function addressFromByteBuffer(addr: string) {
   const bytes = Buffer.from(addr, "base64");
 
   // compute checksum
@@ -299,7 +301,7 @@ async function publish(
 
   const parsedVAA = parse_vaa(signedVAA);
 
-  // console.log(parsedVAA);
+  console.log(parsedVAA);
 
   const globalState = await readAppGlobalState(
     provider,
@@ -329,24 +331,25 @@ async function publish(
   const buf = Buffer.alloc(8);
   for (let i = 0; i < guardianCount; i++) {
     buf.writeBigUInt64BE(BigInt(i++));
-    const gk = globalStateLookupKey(globalState, buf.toString());
-
-    guardianKeys.push(gk);
+    guardianKeys.push( globalStateLookupKey(globalState, buf.toString()));
   }
 
-  //const gid = this.pclib.beginTxGroup()
-  //const sigSubsets = []
+  const groupTx = [];
+  const sigSubsets = [];
 
-  //      for (let i = 0; i < this.numOfVerifySteps; i++) {
-  //        const st = this.stepSize * i
-  //        const sigSetLen = 132 * this.stepSize
-  //
-  //        const keySubset = guardianKeys.slice(st, i < this.numOfVerifySteps - 1 ? st + this.stepSize : undefined)
-  //        sigSubsets.push(data.signatures.slice(i * sigSetLen, i < this.numOfVerifySteps - 1 ? ((i * sigSetLen) + sigSetLen) : undefined))
-  //        this.pclib.addVerifyTx(gid, this.compiledVerifyProgram.hash, txParams, data.vaaBody, keySubset, this.guardianCount)
-  //      }
+  for (let i = 0; i < numOfVerifySteps; i++) {
+    const st = stepSize * i;
+    const sigSetLen = 132 * stepSize;
+
+    const keySubset = guardianKeys.slice(
+      st,
+      i < numOfVerifySteps - 1 ? st + stepSize : undefined
+    );
+    // sigSubsets.push(data.signatures.slice(i * sigSetLen, i < this.numOfVerifySteps - 1 ? ((i * sigSetLen) + sigSetLen) : undefined))
+    //        this.pclib.addVerifyTx(gid, this.compiledVerifyProgram.hash, txParams, data.vaaBody, keySubset, this.guardianCount)
+  }
   //      this.pclib.addPriceStoreTx(gid, this.vaaProcessorOwner, txParams, data.symbol, data.vaaBody.slice(51))
-  //      const txId = await this.pclib.commitVerifyTxGroup(gid, this.compiledVerifyProgram.bytes, sigSubsets, this.vaaProcessorOwner, this.signCallback.bind(this))
+  //        const txId = await this.pclib.commitVerifyTxGroup(gid, this.compiledVerifyProgram.bytes, sigSubsets, this.vaaProcessorOwner, this.signCallback.bind(this))
   //      publishInfo.txid = txId
   //    } catch (e: any) {
   //      publishInfo.status = StatusCode.ERROR_SUBMIT_MESSAGE
