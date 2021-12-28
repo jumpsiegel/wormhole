@@ -1,12 +1,17 @@
+// npx prettier --write .
 
-import algosdk from 'algosdk'
+import algosdk from "algosdk";
 
-const sha512 = require('js-sha512')
-const hibase32 = require('hi-base32')
-import { importCoreWasm, importTokenWasm, setDefaultWasm } from "../solana/wasm";
+const sha512 = require("js-sha512");
+const hibase32 = require("hi-base32");
+import {
+  importCoreWasm,
+  importTokenWasm,
+  setDefaultWasm,
+} from "../solana/wasm";
 setDefaultWasm("node");
 
-const ALGORAND_ADDRESS_SIZE = 58
+const ALGORAND_ADDRESS_SIZE = 58;
 
 //function timeoutPromise (ms, promise) {
 //  return new Promise((resolve, reject) => {
@@ -41,19 +46,19 @@ const ALGORAND_ADDRESS_SIZE = 58
 //  return bytes
 //}
 //
-function addressFromByteBuffer (addr:any) {
-  const bytes = Buffer.from(addr, 'base64')
+function addressFromByteBuffer(addr: any) {
+  const bytes = Buffer.from(addr, "base64");
 
   // compute checksum
-  const checksum = sha512.sha512_256.array(bytes).slice(28, 32)
+  const checksum = sha512.sha512_256.array(bytes).slice(28, 32);
 
-  const c = new Uint8Array(bytes.length + checksum.length)
-  c.set(bytes)
-  c.set(checksum, bytes.length)
+  const c = new Uint8Array(bytes.length + checksum.length);
+  c.set(bytes);
+  c.set(checksum, bytes.length);
 
-  const v = hibase32.encode(c)
+  const v = hibase32.encode(c);
 
-  return v.toString().slice(0, ALGORAND_ADDRESS_SIZE)
+  return v.toString().slice(0, ALGORAND_ADDRESS_SIZE);
 }
 //
 //function printAppCallDeltaArray (deltaArray) {
@@ -77,23 +82,23 @@ function addressFromByteBuffer (addr:any) {
 //}
 //
 
-function appValueState (stateValue:any) : string {
-  let text = ''
+function appValueState(stateValue: any): string {
+  let text = "";
 
   if (stateValue.type == 1) {
-    const addr = addressFromByteBuffer(stateValue.bytes)
+    const addr = addressFromByteBuffer(stateValue.bytes);
     if (addr.length == ALGORAND_ADDRESS_SIZE) {
-      text += addr
+      text += addr;
     } else {
-      text += stateValue.bytes
+      text += stateValue.bytes;
     }
   } else if (stateValue.type == 2) {
-    text = stateValue.uint
+    text = stateValue.uint;
   } else {
-    text += stateValue.bytes
+    text += stateValue.bytes;
   }
 
-  return text
+  return text;
 }
 //
 //function appValueStateString (stateValue) {
@@ -149,36 +154,63 @@ function appValueState (stateValue:any) : string {
 //  return accountInfoResponse['apps-local-state']
 //}
 //
-//// read global state of application
-//async function readAppGlobalState (algodClient, appId, accountAddr) {
-//  const accountInfoResponse = await algodClient.accountInformation(accountAddr).do()
-//  for (let i = 0; i < accountInfoResponse['created-apps'].length; i++) {
-//    if (accountInfoResponse['created-apps'][i].id === appId) {
-//      const globalState = accountInfoResponse['created-apps'][i].params['global-state']
-//
-//      return globalState
-//    }
-//  }
-//}
-//
 
-async function readAppGlobalStateByKey (algodClient:any, appId:any, accountAddr:any, key:any) {
-  const accountInfoResponse = await algodClient.accountInformation(accountAddr).do()
-  for (let i = 0; i < accountInfoResponse['created-apps'].length; i++) {
-    if (accountInfoResponse['created-apps'][i].id === appId) {
+// read global state of application
+async function readAppGlobalState(
+  algodClient: any,
+  appId: any,
+  accountAddr: any
+) {
+  const accountInfoResponse = await algodClient
+    .accountInformation(accountAddr)
+    .do();
+  for (let i = 0; i < accountInfoResponse["created-apps"].length; i++) {
+    if (accountInfoResponse["created-apps"][i].id === appId) {
+      const globalState =
+        accountInfoResponse["created-apps"][i].params["global-state"];
+
+      return globalState;
+    }
+  }
+}
+
+function globalStateLookupKey(stateArray: any, key: string) {
+  for (let j = 0; j < stateArray.length; j++) {
+    const text = Buffer.from(stateArray[j].key, "base64").toString();
+
+    if (key === text) {
+      return appValueState(stateArray[j].value);
+    }
+  }
+  throw new Error("key not found");
+}
+
+async function readAppGlobalStateByKey(
+  algodClient: any,
+  appId: any,
+  accountAddr: any,
+  key: any
+) {
+  const accountInfoResponse = await algodClient
+    .accountInformation(accountAddr)
+    .do();
+  for (let i = 0; i < accountInfoResponse["created-apps"].length; i++) {
+    if (accountInfoResponse["created-apps"][i].id === appId) {
       // console.log("Application's global state:")
-      const stateArray = accountInfoResponse['created-apps'][i].params['global-state']
+      const stateArray =
+        accountInfoResponse["created-apps"][i].params["global-state"];
       for (let j = 0; j < stateArray.length; j++) {
-        const text = Buffer.from(stateArray[j].key, 'base64').toString()
+        const text = Buffer.from(stateArray[j].key, "base64").toString();
 
         if (key === text) {
-          return appValueState(stateArray[j].value)
+          return appValueState(stateArray[j].value);
         }
       }
     }
   }
-  return ""
+  throw new Error("key not found");
 }
+
 //
 //// read local state of application from user account
 //async function readAppLocalState (algodClient, appId, accountAddr) {
@@ -249,73 +281,82 @@ async function readAppGlobalStateByKey (algodClient:any, appId:any, accountAddr:
 //  }
 //}
 
-async function publish (
+async function publish(
   tokenBridgeAddress: string,
   provider: algosdk.Algodv2,
   signer: algosdk.Account,
   signedVAA: Uint8Array
 ) {
-    const txParams = await provider.getTransactionParams().do()
-    txParams.fee = 1000
-    txParams.flatFee = true
+  const txParams = await provider.getTransactionParams().do();
+  txParams.fee = 1000;
+  txParams.flatFee = true;
 
-    const p = tokenBridgeAddress.split(":")
-    const vaaProcessorAppId = parseInt(p[1])
-    const vaaProcessorOwner = p[0]
+  const p = tokenBridgeAddress.split(":");
+  const vaaProcessorAppId = parseInt(p[1]);
+  const vaaProcessorOwner = p[0];
 
-    const { parse_vaa } = await importCoreWasm();
+  const { parse_vaa } = await importCoreWasm();
 
-    const parsedVAA = parse_vaa(signedVAA);
+  const parsedVAA = parse_vaa(signedVAA);
 
-    // console.log(parsedVAA);
+  // console.log(parsedVAA);
 
-    const guardianCount = parseInt(await readAppGlobalStateByKey(provider, vaaProcessorAppId, vaaProcessorOwner, 'gscount'))
-    const stepSize = parseInt(await readAppGlobalStateByKey(provider, vaaProcessorAppId, vaaProcessorOwner, 'vssize'))
-    const numOfVerifySteps = Math.ceil(guardianCount / stepSize)
-    if (guardianCount === 0 || stepSize === 0) {
-        throw new Error('cannot get guardian count and/or step-size from global state')
-    }
+  const globalState = await readAppGlobalState(
+    provider,
+    vaaProcessorAppId,
+    vaaProcessorOwner
+  );
 
-    // (!)
-    // Stateless programs cannot access state nor stack from stateful programs, so
-    // for the VAA Verify program to use the guardian set, we pass the global state as TX argument,
-    // (and check it against the current global list to be sure it's ok). This way it can be read by
-    // VAA verifier as a stateless program CAN DO READS of call transaction arguments in a group.
-    // The same technique is used for the note field, where the payload is set.
-    //
-
-//    try {
-      const guardianKeys = []
-      const buf = Buffer.alloc(8)
-      for (let i = 0; i < guardianCount; i++) {
-        buf.writeBigUInt64BE(BigInt(i++))
-        const gk = await readAppGlobalStateByKey(provider, vaaProcessorAppId, vaaProcessorAppId, buf.toString())
-        guardianKeys.push(gk)
-      }
-
-        //const gid = this.pclib.beginTxGroup()
-        //const sigSubsets = []
-
-//      for (let i = 0; i < this.numOfVerifySteps; i++) {
-//        const st = this.stepSize * i
-//        const sigSetLen = 132 * this.stepSize
-//
-//        const keySubset = guardianKeys.slice(st, i < this.numOfVerifySteps - 1 ? st + this.stepSize : undefined)
-//        sigSubsets.push(data.signatures.slice(i * sigSetLen, i < this.numOfVerifySteps - 1 ? ((i * sigSetLen) + sigSetLen) : undefined))
-//        this.pclib.addVerifyTx(gid, this.compiledVerifyProgram.hash, txParams, data.vaaBody, keySubset, this.guardianCount)
-//      }
-//      this.pclib.addPriceStoreTx(gid, this.vaaProcessorOwner, txParams, data.symbol, data.vaaBody.slice(51))
-//      const txId = await this.pclib.commitVerifyTxGroup(gid, this.compiledVerifyProgram.bytes, sigSubsets, this.vaaProcessorOwner, this.signCallback.bind(this))
-//      publishInfo.txid = txId
-//    } catch (e: any) {
-//      publishInfo.status = StatusCode.ERROR_SUBMIT_MESSAGE
-//      publishInfo.reason = e.response.text ? e.response.text : e.toString()
-//      return publishInfo
-//    }
-//
-//    return publishInfo
-    return { }
+  const guardianCount = parseInt(globalStateLookupKey(globalState, "gscount"));
+  const stepSize = parseInt(globalStateLookupKey(globalState, "vssize"));
+  const numOfVerifySteps = Math.ceil(guardianCount / stepSize);
+  if (guardianCount === 0 || stepSize === 0) {
+    throw new Error(
+      "cannot get guardian count and/or step-size from global state"
+    );
   }
+
+  // (!)
+  // Stateless programs cannot access state nor stack from stateful programs, so
+  // for the VAA Verify program to use the guardian set, we pass the global state as TX argument,
+  // (and check it against the current global list to be sure it's ok). This way it can be read by
+  // VAA verifier as a stateless program CAN DO READS of call transaction arguments in a group.
+  // The same technique is used for the note field, where the payload is set.
+  //
+
+  //    try {
+  const guardianKeys = [];
+  const buf = Buffer.alloc(8);
+  for (let i = 0; i < guardianCount; i++) {
+    buf.writeBigUInt64BE(BigInt(i++));
+    const gk = globalStateLookupKey(globalState, buf.toString());
+
+    guardianKeys.push(gk);
+  }
+
+  //const gid = this.pclib.beginTxGroup()
+  //const sigSubsets = []
+
+  //      for (let i = 0; i < this.numOfVerifySteps; i++) {
+  //        const st = this.stepSize * i
+  //        const sigSetLen = 132 * this.stepSize
+  //
+  //        const keySubset = guardianKeys.slice(st, i < this.numOfVerifySteps - 1 ? st + this.stepSize : undefined)
+  //        sigSubsets.push(data.signatures.slice(i * sigSetLen, i < this.numOfVerifySteps - 1 ? ((i * sigSetLen) + sigSetLen) : undefined))
+  //        this.pclib.addVerifyTx(gid, this.compiledVerifyProgram.hash, txParams, data.vaaBody, keySubset, this.guardianCount)
+  //      }
+  //      this.pclib.addPriceStoreTx(gid, this.vaaProcessorOwner, txParams, data.symbol, data.vaaBody.slice(51))
+  //      const txId = await this.pclib.commitVerifyTxGroup(gid, this.compiledVerifyProgram.bytes, sigSubsets, this.vaaProcessorOwner, this.signCallback.bind(this))
+  //      publishInfo.txid = txId
+  //    } catch (e: any) {
+  //      publishInfo.status = StatusCode.ERROR_SUBMIT_MESSAGE
+  //      publishInfo.reason = e.response.text ? e.response.text : e.toString()
+  //      return publishInfo
+  //    }
+  //
+  //    return publishInfo
+  return {};
+}
 
 export async function createWrappedOnAlgorandTxn(
   tokenBridgeAddress: string,
@@ -323,6 +364,6 @@ export async function createWrappedOnAlgorandTxn(
   signer: algosdk.Account,
   vaaBody: Uint8Array
 ) {
-    console.log("You suck");
-    return publish(tokenBridgeAddress, provider, signer, vaaBody);
+  console.log("You suck");
+  return publish(tokenBridgeAddress, provider, signer, vaaBody);
 }
