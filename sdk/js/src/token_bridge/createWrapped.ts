@@ -7,6 +7,8 @@ import { ixFromRust } from "../solana";
 import { createWrappedOnAlgorandTxn } from "../algorand";
 import { importTokenWasm } from "../solana/wasm";
 
+import algosdk from 'algosdk'
+
 export async function createWrappedOnEth(
   tokenBridgeAddress: string,
   signer: ethers.Signer,
@@ -55,8 +57,8 @@ export async function createWrappedOnSolana(
 
 export async function createWrappedOnAlgorand(
   tokenBridgeAddress: string,
-  provider: any,
-  signer: any,
+  provider: algosdk.Algodv2,
+  signer: algosdk.Account,
   signedVAA: Uint8Array
 ) {
   return await createWrappedOnAlgorandTxn(tokenBridgeAddress, provider, signer, signedVAA);
