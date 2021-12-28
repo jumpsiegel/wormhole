@@ -1,7 +1,7 @@
+import { Algodv2, generateAccount, secretKeyToMnemonic, mnemonicToSecretKey } from "algosdk";
 import { parseUnits } from "@ethersproject/units";
 import { NodeHttpTransport } from "@improbable-eng/grpc-web-node-http-transport";
 import { describe, expect, jest, test } from "@jest/globals";
-import { base32 } from "rfc4648";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   Token,
@@ -23,6 +23,7 @@ import {
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
   createWrappedOnEth,
+  createWrappedOnAlgorand,
   createWrappedOnSolana,
   createWrappedOnTerra,
   getEmitterAddressEth,
@@ -62,6 +63,11 @@ import {
   TEST_ERC20,
   TEST_SOLANA_TOKEN,
   WORMHOLE_RPC_HOSTS,
+  ALGOD_SERVER,
+  ALGOD_TOKEN,
+  ALGOD_PORT,
+  ALGOD_USER_PK,
+  ALGORAND_TOKEN_BRIDGE_ADDRESS
 } from "./consts";
 import { transferFromEthToSolana } from "./helpers";
 
@@ -116,20 +122,18 @@ describe("Integration Tests", () => {
               transport: NodeHttpTransport(),
             }
           );
-          console.log(base32.stringify(signedVAA));
-          // create a signer for Eth
-          const provider = new ethers.providers.WebSocketProvider(ETH_NODE_URL);
-          const signer = new ethers.Wallet(ETH_PRIVATE_KEY, provider);
+          const provider = new Algodv2(ALGOD_TOKEN, ALGOD_SERVER, ALGOD_PORT);
+          const signer = mnemonicToSecretKey(ALGOD_USER_PK);
           try {
-            await createWrappedOnEth(
-              ETH_TOKEN_BRIDGE_ADDRESS,
+            await createWrappedOnAlgorand(
+              ALGORAND_TOKEN_BRIDGE_ADDRESS,
+              provider,
               signer,
               signedVAA
             );
           } catch (e) {
             // this could fail because the token is already attested (in an unclean env)
           }
-          provider.destroy();
           done();
         } catch (e) {
           console.error(e);

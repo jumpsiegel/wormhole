@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import { fromUint8Array } from "js-base64";
 import { Bridge__factory } from "../ethers-contracts";
 import { ixFromRust } from "../solana";
+import { createWrappedOnAlgorandTxn } from "../algorand";
 import { importTokenWasm } from "../solana/wasm";
 
 export async function createWrappedOnEth(
@@ -50,4 +51,13 @@ export async function createWrappedOnSolana(
   transaction.recentBlockhash = blockhash;
   transaction.feePayer = new PublicKey(payerAddress);
   return transaction;
+}
+
+export async function createWrappedOnAlgorand(
+  tokenBridgeAddress: string,
+  provider: any,
+  signer: any,
+  signedVAA: Uint8Array
+) {
+  return await createWrappedOnAlgorandTxn(tokenBridgeAddress, provider, signer, signedVAA);
 }

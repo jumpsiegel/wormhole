@@ -30,7 +30,7 @@ class Account:
     def __init__(self, privateKey: str) -> None:
         self.sk = privateKey
         self.addr = account.address_from_private_key(privateKey)
-#        print (privateKey + " -> " + self.getMnemonic())
+        // print (privateKey + " -> " + self.getMnemonic())
 
     def getAddress(self) -> str:
         return self.addr
@@ -76,6 +76,7 @@ class Setup:
         self.KMD_WALLET_PASSWORD = None
 
         self.TARGET_ACCOUNT = None
+        self.USER_ACCOUNT = None
 
         self.kmdAccounts : Optional[List[Account]] = None
 
@@ -93,6 +94,7 @@ class Setup:
         self.KMD_WALLET_NAME = args.kmd_name
         self.KMD_WALLET_PASSWORD = args.kmd_password
         self.TARGET_ACCOUNT = args.mnemonic
+        self.USER_ACCOUNT = args.user_mnemonic
 
     def main(self) -> None:
         parser = argparse.ArgumentParser(description='algorand setup')
@@ -117,6 +119,9 @@ class Setup:
         # This is the devnet mnemonic...
         parser.add_argument('--mnemonic', type=str, help='account mnemonic', 
                             default="assault approve result rare float sugar power float soul kind galaxy edit unusual pretty tone tilt net range pelican avoid unhappy amused recycle abstract master")
+
+        parser.add_argument('--user_mnemonic', type=str, help='account mnemonic', 
+                            default="hospital wine shrug situate sell hour adjust music alarm rigid need twenty list begin home stick disagree trigger horror feed coffee novel wave above pattern")
     
         parser.add_argument('--appid', type=int, help='setup devnet')
         parser.add_argument('--devnet', action='store_true', help='setup devnet')
@@ -217,6 +222,9 @@ class Setup:
     def getTargetAccount(self) -> Account:
         return Account.FromMnemonic(self.TARGET_ACCOUNT)
 
+    def getUserAccount(self) -> Account:
+        return Account.FromMnemonic(self.USER_ACCOUNT)
+
     def fundTargetAccount(self, client: AlgodClient, target: Account):
         print("fundTargetAccount")
         genesisAccounts = self.getGenesisAccounts()
@@ -260,11 +268,17 @@ class Setup:
         self.client = self.getAlgodClient()
 
         self.target = self.getTargetAccount()
+        self.user = self.getUserAccount()
         
         b = self.getBalances(self.client, self.target.getAddress())
         if (b[0] < 100000000):
             print("Account needs money... funding it")
             self.fundTargetAccount(self.client, self.target)
+
+        b = self.getBalances(self.client, self.user.getAddress())
+        if (b[0] < 100000000):
+            print("Account needs money... funding it")
+            self.fundTargetAccount(self.client, self.user)
 
         #print(self.getBalances(self.client, self.target.getAddress()))
 
@@ -339,7 +353,7 @@ class Setup:
         else:
             response.applicationIndex = self.args.appid
             pprint.pprint(response.__dict__)
-        print("app_id: ", response.applicationIndex)
+        print("app_id: ", response.applicationIndex, "app_address: ", self.target.getAddress())
         appAddr = get_application_address(response.applicationIndex)
         suggestedParams = self.client.suggested_params()
         appCallTxn = transaction.ApplicationCallTxn(

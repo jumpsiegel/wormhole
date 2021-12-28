@@ -33,6 +33,13 @@ export const TEST_ERC20 = "0x2D8BE6BF0baA74e0A907016679CaE9190e80dD0A";
 export const TEST_SOLANA_TOKEN = "2WDq7wSs9zYrpx2kbHDA4RUTRch2CCTP6ZWaH4GNfnQQ";
 export const WORMHOLE_RPC_HOSTS = ["http://localhost:7071"];
 
+export const ALGOD_SERVER = "http://localhost";
+export const ALGOD_PORT = 4001;
+export const ALGOD_TOKEN = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+export const ALGOD_OWNER_PK = "assault approve result rare float sugar power float soul kind galaxy edit unusual pretty tone tilt net range pelican avoid unhappy amused recycle abstract master";
+export const ALGOD_USER_PK = "hospital wine shrug situate sell hour adjust music alarm rigid need twenty list begin home stick disagree trigger horror feed coffee novel wave above pattern";
+export const ALGORAND_TOKEN_BRIDGE_ADDRESS = "OPDM7ACAW64Q4VBWAL77Z5SHSJVZZ44V3BAN7W44U43SUXEOUENZMZYOQU:4";
+
 describe("consts should exist", () => {
   it("has Solana test token", () => {
     expect.assertions(1);
