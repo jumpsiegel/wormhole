@@ -16,8 +16,7 @@ const crypto = require("crypto");
 
 const ALGORAND_ADDRESS_SIZE = 58;
 
-const ALGO_VERIFY_HASH =
-  "HTMQH5OIBRN7YUSVCUPFKOPBJYAOX3Y7ADLLYUEWJQGNZ6RHMY4LLPLXDY";
+const ALGO_VERIFY_HASH = "HTMQH5OIBRN7YUSVCUPFKOPBJYAOX3Y7ADLLYUEWJQGNZ6RHMY4LLPLXDY";
 const ALGO_VERIFY = new Uint8Array([
   5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 1, 129, 232, 7, 14, 68, 49, 27,
   129, 3, 18, 68, 45, 21, 49, 22, 54, 26, 2, 23, 136, 0, 82, 33, 4, 11, 18, 68,
@@ -335,6 +334,7 @@ function addVerifyTx(
 }
 
 async function publish(
+  action: string,
   tokenBridgeAddress: string,
   provider: algosdk.Algodv2,
   signer: algosdk.Account,
@@ -408,18 +408,36 @@ async function publish(
       )
     );
 
-    const tx = addVerifyTx(
+    const tx = algosdk.makeApplicationNoOpTxn(
       ALGO_VERIFY_HASH,
       txParams,
-      parsedVAA.payload,
-      keySubset,
-      guardianCount,
-      vaaProcessorAppId
+      vaaProcessorAppId,
+      [
+        new Uint8Array(Buffer.from("verify")),
+        new Uint8Array(Buffer.from(keySubset.join(""), "hex")),
+        algosdk.encodeUint64(guardianCount),
+      ],
+      undefined,
+      undefined,
+      undefined,
+      new Uint8Array(parsedVAA.payload)
     );
+
     groupTxSet.push(tx);
   }
 
-  //      this.pclib.addPriceStoreTx(gid, this.vaaProcessorOwner, txParams, data.symbol, data.vaaBody.slice(51))
+  const tx = algosdk.makeApplicationNoOpTxn(
+    vaaProcessorOwner,
+    txParams,
+    vaaProcessorAppId,
+    [new Uint8Array(Buffer.from(action))],
+    undefined,
+    undefined,
+    undefined,
+    new Uint8Array(parsedVAA.payload)
+  );
+
+  groupTxSet.push(tx);
 
   algosdk.assignGroupID(groupTxSet);
   const signedGroup = [];
@@ -451,6 +469,5 @@ export async function createWrappedOnAlgorandTxn(
   signer: algosdk.Account,
   vaaBody: Uint8Array
 ) {
-  console.log("You suck");
-  return publish(tokenBridgeAddress, provider, signer, vaaBody);
+  return publish("createWrapped", tokenBridgeAddress, provider, signer, vaaBody);
 }
