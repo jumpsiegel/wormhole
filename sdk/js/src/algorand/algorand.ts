@@ -12,11 +12,28 @@ import {
   setDefaultWasm,
 } from "../solana/wasm";
 setDefaultWasm("node");
+const crypto = require("crypto");
 
 const ALGORAND_ADDRESS_SIZE = 58;
 
-const ALGO_VERIFY_HASH = "HTMQH5OIBRN7YUSVCUPFKOPBJYAOX3Y7ADLLYUEWJQGNZ6RHMY4LLPLXDY"
-const ALGO_VERIFY = new Uint8Array([5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 1, 129, 232, 7, 14, 68, 49, 27, 129, 3, 18, 68, 45, 21, 49, 22, 54, 26, 2, 23, 136, 0, 82, 33, 4, 11, 18, 68, 49, 32, 50, 3, 18, 68, 49, 24, 129, 4, 18, 68, 49, 16, 35, 18, 68, 50, 4, 54, 26, 2, 23, 136, 0, 42, 18, 68, 45, 49, 5, 54, 26, 1, 136, 0, 75, 68, 34, 67, 53, 2, 53, 1, 52, 1, 52, 2, 24, 36, 19, 64, 0, 6, 52, 1, 52, 2, 10, 137, 52, 1, 52, 2, 10, 34, 8, 137, 53, 0, 52, 0, 35, 136, 255, 220, 137, 53, 4, 53, 3, 52, 4, 35, 24, 36, 18, 64, 0, 20, 52, 3, 52, 4, 136, 255, 227, 34, 9, 12, 64, 0, 5, 52, 4, 35, 24, 137, 35, 137, 35, 137, 53, 7, 53, 6, 53, 5, 40, 53, 240, 40, 53, 241, 36, 53, 10, 36, 53, 8, 36, 53, 9, 52, 8, 52, 5, 21, 12, 65, 0, 94, 52, 5, 52, 8, 34, 88, 23, 52, 10, 49, 22, 35, 11, 8, 18, 68, 52, 6, 2, 52, 5, 52, 8, 129, 65, 8, 34, 88, 23, 52, 5, 52, 8, 34, 8, 37, 88, 52, 5, 52, 8, 129, 33, 8, 37, 88, 7, 0, 53, 241, 53, 240, 52, 7, 52, 9, 33, 5, 88, 52, 240, 52, 241, 80, 2, 129, 12, 37, 82, 18, 68, 52, 8, 33, 4, 8, 53, 8, 52, 9, 33, 5, 8, 53, 9, 52, 10, 34, 8, 53, 10, 66, 255, 153, 34, 137, ])
+const ALGO_VERIFY_HASH =
+  "HTMQH5OIBRN7YUSVCUPFKOPBJYAOX3Y7ADLLYUEWJQGNZ6RHMY4LLPLXDY";
+const ALGO_VERIFY = new Uint8Array([
+  5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 1, 129, 232, 7, 14, 68, 49, 27,
+  129, 3, 18, 68, 45, 21, 49, 22, 54, 26, 2, 23, 136, 0, 82, 33, 4, 11, 18, 68,
+  49, 32, 50, 3, 18, 68, 49, 24, 129, 4, 18, 68, 49, 16, 35, 18, 68, 50, 4, 54,
+  26, 2, 23, 136, 0, 42, 18, 68, 45, 49, 5, 54, 26, 1, 136, 0, 75, 68, 34, 67,
+  53, 2, 53, 1, 52, 1, 52, 2, 24, 36, 19, 64, 0, 6, 52, 1, 52, 2, 10, 137, 52,
+  1, 52, 2, 10, 34, 8, 137, 53, 0, 52, 0, 35, 136, 255, 220, 137, 53, 4, 53, 3,
+  52, 4, 35, 24, 36, 18, 64, 0, 20, 52, 3, 52, 4, 136, 255, 227, 34, 9, 12, 64,
+  0, 5, 52, 4, 35, 24, 137, 35, 137, 35, 137, 53, 7, 53, 6, 53, 5, 40, 53, 240,
+  40, 53, 241, 36, 53, 10, 36, 53, 8, 36, 53, 9, 52, 8, 52, 5, 21, 12, 65, 0,
+  94, 52, 5, 52, 8, 34, 88, 23, 52, 10, 49, 22, 35, 11, 8, 18, 68, 52, 6, 2, 52,
+  5, 52, 8, 129, 65, 8, 34, 88, 23, 52, 5, 52, 8, 34, 8, 37, 88, 52, 5, 52, 8,
+  129, 33, 8, 37, 88, 7, 0, 53, 241, 53, 240, 52, 7, 52, 9, 33, 5, 88, 52, 240,
+  52, 241, 80, 2, 129, 12, 37, 82, 18, 68, 52, 8, 33, 4, 8, 53, 8, 52, 9, 33, 5,
+  8, 53, 9, 52, 10, 34, 8, 53, 10, 66, 255, 153, 34, 137,
+]);
 
 //function timeoutPromise (ms, promise) {
 //  return new Promise((resolve, reject) => {
@@ -292,8 +309,7 @@ function addVerifyTx(
   payload: any,
   gksubset: any,
   totalguardians: any,
-  appId: any,
-  groupTx: any
+  appId: any
 ) {
   const appArgs = [];
   appArgs.push(
@@ -312,9 +328,10 @@ function addVerifyTx(
     undefined,
     new Uint8Array(payload)
   );
-  groupTx.push(tx);
+  return tx;
 
-  return tx.txID();
+  //      gid.push(tx)
+  //      return tx.txID()
 }
 
 async function publish(
@@ -368,7 +385,9 @@ async function publish(
     guardianKeys.push(globalStateLookupKey(globalState, buf.toString()));
   }
 
-  const groupTx = [];
+  const gid = crypto.randomBytes(16).toString("hex");
+  const groupTxSet = [];
+
   const sigSubsets = [];
 
   for (let i = 0; i < numOfVerifySteps; i++) {
@@ -388,26 +407,41 @@ async function publish(
         i < numOfVerifySteps - 1 ? i * sigSetLen + sigSetLen : undefined
       )
     );
-//    addVerifyTx(
-//      gid,
-//      ALGO_VERIFY_HASH,
-//      txParams,
-//      data.vaaBody,
-//      keySubset,
-//      guardianCount,
-//      vaaProcessorAppId
-//    );
+
+    const tx = addVerifyTx(
+      ALGO_VERIFY_HASH,
+      txParams,
+      parsedVAA.payload,
+      keySubset,
+      guardianCount,
+      vaaProcessorAppId
+    );
+    groupTxSet.push(tx);
   }
+
   //      this.pclib.addPriceStoreTx(gid, this.vaaProcessorOwner, txParams, data.symbol, data.vaaBody.slice(51))
-  // const txId = await this.pclib.commitVerifyTxGroup(gid, this.compiledVerifyProgram.bytes, sigSubsets, this.vaaProcessorOwner, this.signCallback.bind(this))
-  //      publishInfo.txid = txId
-  //    } catch (e: any) {
-  //      publishInfo.status = StatusCode.ERROR_SUBMIT_MESSAGE
-  //      publishInfo.reason = e.response.text ? e.response.text : e.toString()
-  //      return publishInfo
-  //    }
-  //
-  //    return publishInfo
+
+  algosdk.assignGroupID(groupTxSet);
+  const signedGroup = [];
+  let i = 0;
+  for (const tx of groupTxSet) {
+    // All transactions except last must be signed by stateless code.
+
+    if (i === groupTxSet.length - 1) {
+      const txSigned = tx.signTxn(signer.sk);
+      signedGroup.push(txSigned);
+    } else {
+      const ls = Buffer.from(String(sigSubsets[i]), "hex");
+      const lsig = new algosdk.LogicSigAccount(ALGO_VERIFY, [ls]);
+      const stxn = algosdk.signLogicSigTransaction(tx, lsig);
+      signedGroup.push(stxn.blob);
+    }
+    i++;
+  }
+
+  // Submit the transaction
+  const rawTx = await provider.sendRawTransaction(signedGroup).do();
+
   return {};
 }
 

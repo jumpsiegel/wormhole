@@ -7,4 +7,4 @@ cd $dn
 
 pipenv install
 
-pipenv run python3 setup.py --devnet
+pipenv run python3 setup.py --devnet --appid 4
