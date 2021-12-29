@@ -1,3 +1,4 @@
+
 from time import time, sleep
 from typing import List, Tuple, Dict, Any, Optional, Union
 from base64 import b64decode
@@ -30,7 +31,7 @@ class Account:
     def __init__(self, privateKey: str) -> None:
         self.sk = privateKey
         self.addr = account.address_from_private_key(privateKey)
-        // print (privateKey + " -> " + self.getMnemonic())
+        # print (privateKey + " -> " + self.getMnemonic())
 
     def getAddress(self) -> str:
         return self.addr
@@ -127,12 +128,15 @@ class Setup:
         parser.add_argument('--devnet', action='store_true', help='setup devnet')
         parser.add_argument('--compile', action='store_true', help='test compile')
         parser.add_argument('--test', action='store_true', help='test devnet')
+        parser.add_argument('--export', action='store_true', help='export')
         parser.add_argument('--print', action='store_true', help='print')
     
         args = parser.parse_args()
         s = self
     
         if args.devnet:
+            if args.appid == None:
+                args.appid = 4
             self.init(args)
             s.setup()
             s.devnet_deploy()
@@ -150,6 +154,14 @@ class Setup:
             self.init(args)
             s.setup()
             s.test(args)
+            sys.exit(0)
+
+        if args.export:
+            if args.appid == None:
+                print("you need to specify the appid when testing")
+                sys.exit(-1)
+            self.init(args)
+            s.export()
             sys.exit(0)
     
         if args.print:
@@ -301,7 +313,18 @@ class Setup:
 
         APPROVAL_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_program(), Mode.Application)
         CLEAR_STATE_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_clear(), Mode.Application)
-        VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(int(0)), Mode.Signature)
+        VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(int(self.args.appid)), Mode.Signature)
+
+    def export(self):
+        self.client = self.getAlgodClient()
+        self.target = self.getTargetAccount()
+
+        VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(int(self.args.appid)), Mode.Signature)
+        print("const ALGO_VERIFY_HASH = \"%s\""%(VERIFY_PROGRAM[1]));
+        print("const ALGO_VERIFY = new Uint8Array([", end='')
+        for x in VERIFY_PROGRAM[0]:
+            print("%d, "%(x), end='')
+        print("])")
 
     def devnet_deploy(self):
         from vaa_processor import vaa_processor_program
@@ -310,7 +333,7 @@ class Setup:
 
         APPROVAL_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_program(), Mode.Application)
         CLEAR_STATE_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_clear(), Mode.Application)
-        VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(int(0)), Mode.Signature)
+        VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(int(self.args.appid)), Mode.Signature)
 
         vaa_processor_approval = APPROVAL_PROGRAM[0]
         vaa_processor_clear = CLEAR_STATE_PROGRAM[0]
