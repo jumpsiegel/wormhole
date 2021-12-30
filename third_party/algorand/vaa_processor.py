@@ -256,7 +256,7 @@ def vaa_processor_program():
     handle_delete = Return(is_creator())
     handle_noop = Cond(
         [METHOD == Bytes("setvphash"), setvphash()],
-        [METHOD == Bytes("parseAndVerifyVM"), parseAndVerifyVM()]
+        [METHOD == Bytes("parseAndVerifyVM"), parseAndVerifyVM()],
         [METHOD == Bytes("nop"), nop()]
     )
     return Cond(

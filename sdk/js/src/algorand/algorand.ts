@@ -502,8 +502,9 @@ export async function createWrappedOnAlgorandTxn(
   signer: algosdk.Account,
   vaaBody: Uint8Array
 ) {
-  return alib.publish(
-    "createWrapped",
+  console.log("you suck")
+  return await alib.publish(
+    "nop",
     tokenBridgeAddress,
     provider,
     signer,
