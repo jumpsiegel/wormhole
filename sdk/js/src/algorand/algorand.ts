@@ -16,22 +16,23 @@ const crypto = require("crypto");
 
 const ALGORAND_ADDRESS_SIZE = 58;
 
-const ALGO_VERIFY_HASH = "HTMQH5OIBRN7YUSVCUPFKOPBJYAOX3Y7ADLLYUEWJQGNZ6RHMY4LLPLXDY";
+const ALGO_VERIFY_HASH =
+  "VHASIDAP4TUFVHYZLBINKHOXMWCKSYCEWYRAVBYSSBPZGRES7FUBY3C5PE";
 const ALGO_VERIFY = new Uint8Array([
-  5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 1, 129, 232, 7, 14, 68, 49, 27,
-  129, 3, 18, 68, 45, 21, 49, 22, 54, 26, 2, 23, 136, 0, 82, 33, 4, 11, 18, 68,
-  49, 32, 50, 3, 18, 68, 49, 24, 129, 4, 18, 68, 49, 16, 35, 18, 68, 50, 4, 54,
-  26, 2, 23, 136, 0, 42, 18, 68, 45, 49, 5, 54, 26, 1, 136, 0, 75, 68, 34, 67,
-  53, 2, 53, 1, 52, 1, 52, 2, 24, 36, 19, 64, 0, 6, 52, 1, 52, 2, 10, 137, 52,
-  1, 52, 2, 10, 34, 8, 137, 53, 0, 52, 0, 35, 136, 255, 220, 137, 53, 4, 53, 3,
-  52, 4, 35, 24, 36, 18, 64, 0, 20, 52, 3, 52, 4, 136, 255, 227, 34, 9, 12, 64,
-  0, 5, 52, 4, 35, 24, 137, 35, 137, 35, 137, 53, 7, 53, 6, 53, 5, 40, 53, 240,
-  40, 53, 241, 36, 53, 10, 36, 53, 8, 36, 53, 9, 52, 8, 52, 5, 21, 12, 65, 0,
-  94, 52, 5, 52, 8, 34, 88, 23, 52, 10, 49, 22, 35, 11, 8, 18, 68, 52, 6, 2, 52,
-  5, 52, 8, 129, 65, 8, 34, 88, 23, 52, 5, 52, 8, 34, 8, 37, 88, 52, 5, 52, 8,
-  129, 33, 8, 37, 88, 7, 0, 53, 241, 53, 240, 52, 7, 52, 9, 33, 5, 88, 52, 240,
-  52, 241, 80, 2, 129, 12, 37, 82, 18, 68, 52, 8, 33, 4, 8, 53, 8, 52, 9, 33, 5,
-  8, 53, 9, 52, 10, 34, 8, 53, 10, 66, 255, 153, 34, 137,
+  5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 27, 129, 3, 18, 68, 45, 21, 49,
+  22, 54, 26, 2, 23, 136, 0, 76, 33, 4, 11, 18, 68, 49, 32, 50, 3, 18, 68, 49,
+  16, 35, 18, 68, 50, 4, 54, 26, 2, 23, 136, 0, 42, 18, 68, 45, 49, 5, 54, 26,
+  1, 136, 0, 75, 68, 34, 67, 53, 2, 53, 1, 52, 1, 52, 2, 24, 36, 19, 64, 0, 6,
+  52, 1, 52, 2, 10, 137, 52, 1, 52, 2, 10, 34, 8, 137, 53, 0, 52, 0, 35, 136,
+  255, 220, 137, 53, 4, 53, 3, 52, 4, 35, 24, 36, 18, 64, 0, 20, 52, 3, 52, 4,
+  136, 255, 227, 34, 9, 12, 64, 0, 5, 52, 4, 35, 24, 137, 35, 137, 35, 137, 53,
+  7, 53, 6, 53, 5, 40, 53, 240, 40, 53, 241, 36, 53, 10, 36, 53, 8, 36, 53, 9,
+  52, 8, 52, 5, 21, 12, 65, 0, 94, 52, 5, 52, 8, 34, 88, 23, 52, 10, 49, 22, 35,
+  11, 8, 18, 68, 52, 6, 2, 52, 5, 52, 8, 129, 65, 8, 34, 88, 23, 52, 5, 52, 8,
+  34, 8, 37, 88, 52, 5, 52, 8, 129, 33, 8, 37, 88, 7, 0, 53, 241, 53, 240, 52,
+  7, 52, 9, 33, 5, 88, 52, 240, 52, 241, 80, 2, 129, 12, 37, 82, 18, 68, 52, 8,
+  33, 4, 8, 53, 8, 52, 9, 33, 5, 8, 53, 9, 52, 10, 34, 8, 53, 10, 66, 255, 153,
+  34, 137,
 ]);
 
 //function timeoutPromise (ms, promise) {
@@ -302,35 +303,30 @@ async function readAppGlobalStateByKey(
 //  }
 //}
 
-function addVerifyTx(
-  sender: any,
-  params: any,
-  payload: any,
-  gksubset: any,
-  totalguardians: any,
-  appId: any
-) {
-  const appArgs = [];
-  appArgs.push(
-    new Uint8Array(Buffer.from("verify")),
-    new Uint8Array(Buffer.from(gksubset.join(""), "hex")),
-    algosdk.encodeUint64(parseInt(totalguardians))
-  );
+/**
+ * Helper function to wait until transaction txId is included in a block/round.
+ * @param  {String} txId transaction id to wait for
+ * @return {VOID} VOID
+ */
+async function waitForConfirmation(txId: string, algodClient: algosdk.Algodv2) {
+  const status = await algodClient.status().do();
+  let lastRound = status["last-round"];
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const pendingInfo = await algodClient
+      .pendingTransactionInformation(txId)
+      .do();
+    if (
+      pendingInfo["confirmed-round"] !== null &&
+      pendingInfo["confirmed-round"] > 0
+    ) {
+      // Got the completed Transaction
 
-  const tx = algosdk.makeApplicationNoOpTxn(
-    sender,
-    params,
-    appId,
-    appArgs,
-    undefined,
-    undefined,
-    undefined,
-    new Uint8Array(payload)
-  );
-  return tx;
-
-  //      gid.push(tx)
-  //      return tx.txID()
+      return pendingInfo;
+    }
+    lastRound += 1;
+    await algodClient.statusAfterBlock(lastRound).do();
+  }
 }
 
 async function publish(
@@ -460,6 +456,14 @@ async function publish(
   // Submit the transaction
   const rawTx = await provider.sendRawTransaction(signedGroup).do();
 
+  console.log(rawTx);
+  console.log(
+    await waitForConfirmation(
+      signedGroup[signedGroup.length - 1].get_txid(),
+      provider
+    )
+  );
+
   return {};
 }
 
@@ -469,5 +473,11 @@ export async function createWrappedOnAlgorandTxn(
   signer: algosdk.Account,
   vaaBody: Uint8Array
 ) {
-  return publish("createWrapped", tokenBridgeAddress, provider, signer, vaaBody);
+  return publish(
+    "createWrapped",
+    tokenBridgeAddress,
+    provider,
+    signer,
+    vaaBody
+  );
 }

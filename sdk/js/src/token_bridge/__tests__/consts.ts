@@ -38,7 +38,7 @@ export const ALGOD_PORT = 4001;
 export const ALGOD_TOKEN = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 export const ALGOD_OWNER_PK = "assault approve result rare float sugar power float soul kind galaxy edit unusual pretty tone tilt net range pelican avoid unhappy amused recycle abstract master";
 export const ALGOD_USER_PK = "hospital wine shrug situate sell hour adjust music alarm rigid need twenty list begin home stick disagree trigger horror feed coffee novel wave above pattern";
-export const ALGORAND_TOKEN_BRIDGE_ADDRESS = "OPDM7ACAW64Q4VBWAL77Z5SHSJVZZ44V3BAN7W44U43SUXEOUENZMZYOQU:4";
+export const ALGORAND_TOKEN_BRIDGE_ADDRESS = "OPDM7ACAW64Q4VBWAL77Z5SHSJVZZ44V3BAN7W44U43SUXEOUENZMZYOQU:7";
 
 describe("consts should exist", () => {
   it("has Solana test token", () => {

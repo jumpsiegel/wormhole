@@ -135,8 +135,6 @@ class Setup:
         s = self
     
         if args.devnet:
-            if args.appid == None:
-                args.appid = 4
             self.init(args)
             s.setup()
             s.devnet_deploy()
@@ -157,9 +155,6 @@ class Setup:
             sys.exit(0)
 
         if args.export:
-            if args.appid == None:
-                print("you need to specify the appid when testing")
-                sys.exit(-1)
             self.init(args)
             s.export()
             sys.exit(0)
@@ -319,7 +314,7 @@ class Setup:
         self.client = self.getAlgodClient()
         self.target = self.getTargetAccount()
 
-        VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(int(self.args.appid)), Mode.Signature)
+        VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(), Mode.Signature)
         print("const ALGO_VERIFY_HASH = \"%s\""%(VERIFY_PROGRAM[1]));
         print("const ALGO_VERIFY = new Uint8Array([", end='')
         for x in VERIFY_PROGRAM[0]:
@@ -333,7 +328,7 @@ class Setup:
 
         APPROVAL_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_program(), Mode.Application)
         CLEAR_STATE_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_clear(), Mode.Application)
-        VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(int(self.args.appid)), Mode.Signature)
+        VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(), Mode.Signature)
 
         vaa_processor_approval = APPROVAL_PROGRAM[0]
         vaa_processor_clear = CLEAR_STATE_PROGRAM[0]
@@ -346,7 +341,11 @@ class Setup:
     
         app_args = [ bytes.fromhex("beFA429d57cD18b7F8A4d91A2da9AB4AF05d0FBe"), 86400, 0 ]
 
-        if self.args.appid == None:
+        ret = (self.read_global_state(self.client, self.target.getAddress(), self.args.appid))
+
+        pprint.pprint(ret)
+
+        if ret == {}:
             txn = transaction.ApplicationCreateTxn(
                 sender=self.target.getAddress(),
                 on_complete=transaction.OnComplete.NoOpOC,
@@ -371,7 +370,7 @@ class Setup:
         self.client.send_transaction(signedTxn)
         response = self.waitForTransaction(self.client, signedTxn.get_txid())
         
-        if self.args.appid == None:
+        if self.args.appid == None or ret == {}:
             assert response.applicationIndex is not None and response.applicationIndex > 0
         else:
             response.applicationIndex = self.args.appid
@@ -430,6 +429,10 @@ class Setup:
             if app['id'] == app_id:
                 return self.format_state(app['params']['global-state'])
         return {}
+
+    def read_state(self, client, addr):
+        results = client.account_info(addr)
+        return results['created-apps']
 
     def printState(self, args):
         pprint.pprint(self.read_global_state(self.client, self.target.getAddress(), args.appid))
