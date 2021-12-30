@@ -478,17 +478,16 @@ class AlgorandLib {
 
       console.log(rawTx);
       console.log(signedGroup);
+
+      console.log("waitForConfirmation");
+      console.log(await waitForConfirmation(tawTx, provider));
+      console.log("waitForConfirmationDone");
     } catch (e) {
+      console.log("exception");
       console.log(e);
     } finally {
       console.log("finally");
     }
-    //  console.log(
-    //    await waitForConfirmation(
-    //      signedGroup[signedGroup.length - 1].get_txid(),
-    //      provider
-    //    )
-    //  );
 
     return {};
   }
