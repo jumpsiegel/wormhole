@@ -218,6 +218,11 @@ def setvphash():
     ])
 
 
+def nop():
+    return Seq([
+        Approve()
+    ])
+
 def parseAndVerifyVM():
     # * Sender must be stateless logic.
     # * Let N be the number of signatures per verification step, for the TX(i) in group, we verify signatures [j..k] where j = i*N, k = j+(N-1)
@@ -252,6 +257,7 @@ def vaa_processor_program():
     handle_noop = Cond(
         [METHOD == Bytes("setvphash"), setvphash()],
         [METHOD == Bytes("parseAndVerifyVM"), parseAndVerifyVM()]
+        [METHOD == Bytes("nop"), nop()]
     )
     return Cond(
         [Txn.application_id() == Int(0), handle_create],

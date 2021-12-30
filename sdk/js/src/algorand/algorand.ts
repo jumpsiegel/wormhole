@@ -14,405 +14,429 @@ import {
 setDefaultWasm("node");
 const crypto = require("crypto");
 
-const ALGORAND_ADDRESS_SIZE = 58;
+class AlgorandLib {
+  ALGORAND_ADDRESS_SIZE: number;
+  ALGO_VERIFY_HASH: string;
+  ALGO_VERIFY: Uint8Array;
 
-const ALGO_VERIFY_HASH =
-  "VHASIDAP4TUFVHYZLBINKHOXMWCKSYCEWYRAVBYSSBPZGRES7FUBY3C5PE";
-const ALGO_VERIFY = new Uint8Array([
-  5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 27, 129, 3, 18, 68, 45, 21, 49,
-  22, 54, 26, 2, 23, 136, 0, 76, 33, 4, 11, 18, 68, 49, 32, 50, 3, 18, 68, 49,
-  16, 35, 18, 68, 50, 4, 54, 26, 2, 23, 136, 0, 42, 18, 68, 45, 49, 5, 54, 26,
-  1, 136, 0, 75, 68, 34, 67, 53, 2, 53, 1, 52, 1, 52, 2, 24, 36, 19, 64, 0, 6,
-  52, 1, 52, 2, 10, 137, 52, 1, 52, 2, 10, 34, 8, 137, 53, 0, 52, 0, 35, 136,
-  255, 220, 137, 53, 4, 53, 3, 52, 4, 35, 24, 36, 18, 64, 0, 20, 52, 3, 52, 4,
-  136, 255, 227, 34, 9, 12, 64, 0, 5, 52, 4, 35, 24, 137, 35, 137, 35, 137, 53,
-  7, 53, 6, 53, 5, 40, 53, 240, 40, 53, 241, 36, 53, 10, 36, 53, 8, 36, 53, 9,
-  52, 8, 52, 5, 21, 12, 65, 0, 94, 52, 5, 52, 8, 34, 88, 23, 52, 10, 49, 22, 35,
-  11, 8, 18, 68, 52, 6, 2, 52, 5, 52, 8, 129, 65, 8, 34, 88, 23, 52, 5, 52, 8,
-  34, 8, 37, 88, 52, 5, 52, 8, 129, 33, 8, 37, 88, 7, 0, 53, 241, 53, 240, 52,
-  7, 52, 9, 33, 5, 88, 52, 240, 52, 241, 80, 2, 129, 12, 37, 82, 18, 68, 52, 8,
-  33, 4, 8, 53, 8, 52, 9, 33, 5, 8, 53, 9, 52, 10, 34, 8, 53, 10, 66, 255, 153,
-  34, 137,
-]);
+  constructor() {
+    this.ALGORAND_ADDRESS_SIZE = 58;
 
-//function timeoutPromise (ms, promise) {
-//  return new Promise((resolve, reject) => {
-//    const timeoutId = setTimeout(() => {
-//      reject(new Error('promise timeout'))
-//    }, ms)
-//    promise.then(
-//      (res) => {
-//        clearTimeout(timeoutId)
-//        resolve(res)
-//      },
-//      (err) => {
-//        clearTimeout(timeoutId)
-//        reject(err)
-//      }
-//    )
-//  })
-//}
-//
-//function getInt64Bytes (x, len) {
-//  if (!len) {
-//    len = 8
-//  }
-//  const bytes = new Uint8Array(len)
-//  do {
-//    len -= 1
-//    // eslint-disable-next-line no-bitwise
-//    bytes[len] = x & (255)
-//    // eslint-disable-next-line no-bitwise
-//    x >>= 8
-//  } while (len)
-//  return bytes
-//}
-//
-function addressFromByteBuffer(addr: string) {
-  const bytes = Buffer.from(addr, "base64");
+    this.ALGO_VERIFY_HASH =
+      "VHASIDAP4TUFVHYZLBINKHOXMWCKSYCEWYRAVBYSSBPZGRES7FUBY3C5PE";
+    this.ALGO_VERIFY = new Uint8Array([
+      5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 27, 129, 3, 18, 68, 45, 21,
+      49, 22, 54, 26, 2, 23, 136, 0, 76, 33, 4, 11, 18, 68, 49, 32, 50, 3, 18,
+      68, 49, 16, 35, 18, 68, 50, 4, 54, 26, 2, 23, 136, 0, 42, 18, 68, 45, 49,
+      5, 54, 26, 1, 136, 0, 75, 68, 34, 67, 53, 2, 53, 1, 52, 1, 52, 2, 24, 36,
+      19, 64, 0, 6, 52, 1, 52, 2, 10, 137, 52, 1, 52, 2, 10, 34, 8, 137, 53, 0,
+      52, 0, 35, 136, 255, 220, 137, 53, 4, 53, 3, 52, 4, 35, 24, 36, 18, 64, 0,
+      20, 52, 3, 52, 4, 136, 255, 227, 34, 9, 12, 64, 0, 5, 52, 4, 35, 24, 137,
+      35, 137, 35, 137, 53, 7, 53, 6, 53, 5, 40, 53, 240, 40, 53, 241, 36, 53,
+      10, 36, 53, 8, 36, 53, 9, 52, 8, 52, 5, 21, 12, 65, 0, 94, 52, 5, 52, 8,
+      34, 88, 23, 52, 10, 49, 22, 35, 11, 8, 18, 68, 52, 6, 2, 52, 5, 52, 8,
+      129, 65, 8, 34, 88, 23, 52, 5, 52, 8, 34, 8, 37, 88, 52, 5, 52, 8, 129,
+      33, 8, 37, 88, 7, 0, 53, 241, 53, 240, 52, 7, 52, 9, 33, 5, 88, 52, 240,
+      52, 241, 80, 2, 129, 12, 37, 82, 18, 68, 52, 8, 33, 4, 8, 53, 8, 52, 9,
+      33, 5, 8, 53, 9, 52, 10, 34, 8, 53, 10, 66, 255, 153, 34, 137,
+    ]);
+  }
 
-  // compute checksum
-  const checksum = sha512.sha512_256.array(bytes).slice(28, 32);
+  //function timeoutPromise (ms, promise) {
+  //  return new Promise((resolve, reject) => {
+  //    const timeoutId = setTimeout(() => {
+  //      reject(new Error('promise timeout'))
+  //    }, ms)
+  //    promise.then(
+  //      (res) => {
+  //        clearTimeout(timeoutId)
+  //        resolve(res)
+  //      },
+  //      (err) => {
+  //        clearTimeout(timeoutId)
+  //        reject(err)
+  //      }
+  //    )
+  //  })
+  //}
+  //
+  //function getInt64Bytes (x, len) {
+  //  if (!len) {
+  //    len = 8
+  //  }
+  //  const bytes = new Uint8Array(len)
+  //  do {
+  //    len -= 1
+  //    // eslint-disable-next-line no-bitwise
+  //    bytes[len] = x & (255)
+  //    // eslint-disable-next-line no-bitwise
+  //    x >>= 8
+  //  } while (len)
+  //  return bytes
+  //}
+  //
 
-  const c = new Uint8Array(bytes.length + checksum.length);
-  c.set(bytes);
-  c.set(checksum, bytes.length);
+  addressFromByteBuffer(addr: string): string {
+    const bytes = Buffer.from(addr, "base64");
 
-  const v = hibase32.encode(c);
+    // compute checksum
+    const checksum = sha512.sha512_256.array(bytes).slice(28, 32);
 
-  return v.toString().slice(0, ALGORAND_ADDRESS_SIZE);
-}
-//
-//function printAppCallDeltaArray (deltaArray) {
-//  for (let i = 0; i < deltaArray.length; i++) {
-//    if (deltaArray[i].address) {
-//      console.log('Local state change address: ' + deltaArray[i].address)
-//      for (let j = 0; j < deltaArray[i].delta.length; j++) {
-//        printAppCallDelta(deltaArray[i].delta[j])
-//      }
-//    } else {
-//      console.log('Global state change')
-//      printAppCallDelta(deltaArray[i])
-//    }
-//  }
-//}
-//
-//function printAppStateArray (stateArray) {
-//  for (let n = 0; n < stateArray.length; n++) {
-//    printAppState(stateArray[n])
-//  }
-//}
-//
+    const c = new Uint8Array(bytes.length + checksum.length);
+    c.set(bytes);
+    c.set(checksum, bytes.length);
 
-function appValueState(stateValue: any): string {
-  let text = "";
+    const v = hibase32.encode(c);
 
-  if (stateValue.type == 1) {
-    const addr = addressFromByteBuffer(stateValue.bytes);
-    if (addr.length == ALGORAND_ADDRESS_SIZE) {
-      text += addr;
+    return v.toString().slice(0, this.ALGORAND_ADDRESS_SIZE);
+  }
+
+  //
+  //function printAppCallDeltaArray (deltaArray) {
+  //  for (let i = 0; i < deltaArray.length; i++) {
+  //    if (deltaArray[i].address) {
+  //      console.log('Local state change address: ' + deltaArray[i].address)
+  //      for (let j = 0; j < deltaArray[i].delta.length; j++) {
+  //        printAppCallDelta(deltaArray[i].delta[j])
+  //      }
+  //    } else {
+  //      console.log('Global state change')
+  //      printAppCallDelta(deltaArray[i])
+  //    }
+  //  }
+  //}
+  //
+  //function printAppStateArray (stateArray) {
+  //  for (let n = 0; n < stateArray.length; n++) {
+  //    printAppState(stateArray[n])
+  //  }
+  //}
+  //
+
+  appValueState(stateValue: any): string {
+    let text = "";
+
+    if (stateValue.type == 1) {
+      const addr = this.addressFromByteBuffer(stateValue.bytes);
+      if (addr.length == this.ALGORAND_ADDRESS_SIZE) {
+        text += addr;
+      } else {
+        text += stateValue.bytes;
+      }
+    } else if (stateValue.type == 2) {
+      text = stateValue.uint;
     } else {
       text += stateValue.bytes;
     }
-  } else if (stateValue.type == 2) {
-    text = stateValue.uint;
-  } else {
-    text += stateValue.bytes;
+
+    return text;
   }
+  //
+  //function appValueStateString (stateValue) {
+  //  let text = ''
+  //
+  //  if (stateValue.type == 1) {
+  //    const addr = addressFromByteBuffer(stateValue.bytes)
+  //    if (addr.length == ALGORAND_ADDRESS_SIZE) {
+  //      text += addr
+  //    } else {
+  //      text += stateValue.bytes
+  //    }
+  //  } else if (stateValue.type == 2) {
+  //    text += stateValue.uint
+  //  } else {
+  //    text += stateValue.bytes
+  //  }
+  //
+  //  return text
+  //}
+  //
+  //function printAppState (state) {
+  //  let text = Buffer.from(state.key, 'base64').toString() + ': '
+  //
+  //  text += appValueStateString(state.value)
+  //
+  //  console.log(text)
+  //}
+  //
+  //async function printAppLocalState (algodClient, appId, accountAddr) {
+  //  const ret = await readAppLocalState(algodClient, appId, accountAddr)
+  //  if (ret) {
+  //    console.log('Application %d local state for account %s:', appId, accountAddr)
+  //    printAppStateArray(ret)
+  //  }
+  //}
+  //
+  //async function printAppGlobalState (algodClient, appId, accountAddr) {
+  //  const ret = await readAppGlobalState(algodClient, appId, accountAddr)
+  //  if (ret) {
+  //    console.log('Application %d global state:', appId)
+  //    printAppStateArray(ret)
+  //  }
+  //}
+  //
+  //async function readCreatedApps (algodClient, accountAddr) {
+  //  const accountInfoResponse = await algodClient.accountInformation(accountAddr).do()
+  //  return accountInfoResponse['created-apps']
+  //}
+  //
+  //async function readOptedInApps (algodClient, accountAddr) {
+  //  const accountInfoResponse = await algodClient.accountInformation(accountAddr).do()
+  //  return accountInfoResponse['apps-local-state']
+  //}
+  //
 
-  return text;
-}
-//
-//function appValueStateString (stateValue) {
-//  let text = ''
-//
-//  if (stateValue.type == 1) {
-//    const addr = addressFromByteBuffer(stateValue.bytes)
-//    if (addr.length == ALGORAND_ADDRESS_SIZE) {
-//      text += addr
-//    } else {
-//      text += stateValue.bytes
-//    }
-//  } else if (stateValue.type == 2) {
-//    text += stateValue.uint
-//  } else {
-//    text += stateValue.bytes
-//  }
-//
-//  return text
-//}
-//
-//function printAppState (state) {
-//  let text = Buffer.from(state.key, 'base64').toString() + ': '
-//
-//  text += appValueStateString(state.value)
-//
-//  console.log(text)
-//}
-//
-//async function printAppLocalState (algodClient, appId, accountAddr) {
-//  const ret = await readAppLocalState(algodClient, appId, accountAddr)
-//  if (ret) {
-//    console.log('Application %d local state for account %s:', appId, accountAddr)
-//    printAppStateArray(ret)
-//  }
-//}
-//
-//async function printAppGlobalState (algodClient, appId, accountAddr) {
-//  const ret = await readAppGlobalState(algodClient, appId, accountAddr)
-//  if (ret) {
-//    console.log('Application %d global state:', appId)
-//    printAppStateArray(ret)
-//  }
-//}
-//
-//async function readCreatedApps (algodClient, accountAddr) {
-//  const accountInfoResponse = await algodClient.accountInformation(accountAddr).do()
-//  return accountInfoResponse['created-apps']
-//}
-//
-//async function readOptedInApps (algodClient, accountAddr) {
-//  const accountInfoResponse = await algodClient.accountInformation(accountAddr).do()
-//  return accountInfoResponse['apps-local-state']
-//}
-//
+  // read global state of application
+  async readAppGlobalState(algodClient: any, appId: any, accountAddr: any) {
+    const accountInfoResponse = await algodClient
+      .accountInformation(accountAddr)
+      .do();
+    for (let i = 0; i < accountInfoResponse["created-apps"].length; i++) {
+      if (accountInfoResponse["created-apps"][i].id === appId) {
+        const globalState =
+          accountInfoResponse["created-apps"][i].params["global-state"];
 
-// read global state of application
-async function readAppGlobalState(
-  algodClient: any,
-  appId: any,
-  accountAddr: any
-) {
-  const accountInfoResponse = await algodClient
-    .accountInformation(accountAddr)
-    .do();
-  for (let i = 0; i < accountInfoResponse["created-apps"].length; i++) {
-    if (accountInfoResponse["created-apps"][i].id === appId) {
-      const globalState =
-        accountInfoResponse["created-apps"][i].params["global-state"];
-
-      return globalState;
-    }
-  }
-}
-
-function globalStateLookupKey(stateArray: any, key: string) {
-  for (let j = 0; j < stateArray.length; j++) {
-    const text = Buffer.from(stateArray[j].key, "base64").toString();
-
-    if (key === text) {
-      return appValueState(stateArray[j].value);
-    }
-  }
-  throw new Error("key not found");
-}
-
-async function readAppGlobalStateByKey(
-  algodClient: any,
-  appId: any,
-  accountAddr: any,
-  key: any
-) {
-  const accountInfoResponse = await algodClient
-    .accountInformation(accountAddr)
-    .do();
-  for (let i = 0; i < accountInfoResponse["created-apps"].length; i++) {
-    if (accountInfoResponse["created-apps"][i].id === appId) {
-      // console.log("Application's global state:")
-      const stateArray =
-        accountInfoResponse["created-apps"][i].params["global-state"];
-      for (let j = 0; j < stateArray.length; j++) {
-        const text = Buffer.from(stateArray[j].key, "base64").toString();
-
-        if (key === text) {
-          return appValueState(stateArray[j].value);
-        }
+        return globalState;
       }
     }
   }
-  throw new Error("key not found");
-}
 
-//
-//// read local state of application from user account
-//async function readAppLocalState (algodClient, appId, accountAddr) {
-//  const accountInfoResponse = await algodClient.accountInformation(accountAddr).do()
-//  for (let i = 0; i < accountInfoResponse['apps-local-state'].length; i++) {
-//    if (accountInfoResponse['apps-local-state'][i].id === appId) {
-//      // console.log(accountAddr + " opted in, local state:")
-//
-//      if (accountInfoResponse['apps-local-state'][i]['key-value']) {
-//        return accountInfoResponse['apps-local-state'][i]['key-value']
-//      }
-//    }
-//  }
-//}
-//
-//async function readAppLocalStateByKey (algodClient, appId, accountAddr, key) {
-//  const accountInfoResponse = await algodClient.accountInformation(accountAddr).do()
-//  for (let i = 0; i < accountInfoResponse['apps-local-state'].length; i++) {
-//    if (accountInfoResponse['apps-local-state'][i].id === appId) {
-//      const stateArray = accountInfoResponse['apps-local-state'][i]['key-value']
-//
-//      if (!stateArray) {
-//        return null
-//      }
-//      for (let j = 0; j < stateArray.length; j++) {
-//        const text = Buffer.from(stateArray[j].key, 'base64').toString()
-//
-//        if (key === text) {
-//          return appValueState(stateArray[j].value)
-//        }
-//      }
-//      // not found assume 0
-//      return 0
-//    }
-//  }
-//}
-//
-//function uintArray8ToString (byteArray) {
-//  return Array.from(byteArray, function (byte) {
-//    // eslint-disable-next-line no-bitwise
-//    return ('0' + (byte & 0xFF).toString(16)).slice(-2)
-//  }).join('')
-//}
-//
-///**
-// * Verify if transactionResponse has any information about a transaction local or global state change.
-// * @param  {Object} transactionResponse object containing the transaction response of an application call
-// * @return {Boolean} returns true if there is a local or global delta meanining that
-// * the transaction made a change in the local or global state
-// */
-//function anyAppCallDelta (transactionResponse) {
-//  return (transactionResponse['global-state-delta'] || transactionResponse['local-state-delta'])
-//}
-//
-///**
-// * Print to stdout the changes introduced by the transaction that generated the transactionResponse if any.
-// * @param  {Object} transactionResponse object containing the transaction response of an application call
-// * @return {void}
-// */
-//function printAppCallDelta (transactionResponse) {
-//  if (transactionResponse['global-state-delta'] !== undefined) {
-//    console.log('Global State updated:')
-//    printAppCallDeltaArray(transactionResponse['global-state-delta'])
-//  }
-//  if (transactionResponse['local-state-delta'] !== undefined) {
-//    console.log('Local State updated:')
-//    printAppCallDeltaArray(transactionResponse['local-state-delta'])
-//  }
-//}
+  globalStateLookupKey(stateArray: any, key: string): any {
+    for (let j = 0; j < stateArray.length; j++) {
+      const text = Buffer.from(stateArray[j].key, "base64").toString();
 
-/**
- * Helper function to wait until transaction txId is included in a block/round.
- * @param  {String} txId transaction id to wait for
- * @return {VOID} VOID
- */
-async function waitForConfirmation(txId: string, algodClient: algosdk.Algodv2) {
-  const status = await algodClient.status().do();
-  let lastRound = status["last-round"];
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const pendingInfo = await algodClient
-      .pendingTransactionInformation(txId)
-      .do();
-    if (
-      pendingInfo["confirmed-round"] !== null &&
-      pendingInfo["confirmed-round"] > 0
-    ) {
-      // Got the completed Transaction
-
-      return pendingInfo;
+      if (key === text) {
+        return this.appValueState(stateArray[j].value);
+      }
     }
-    lastRound += 1;
-    await algodClient.statusAfterBlock(lastRound).do();
-  }
-}
-
-async function publish(
-  action: string,
-  tokenBridgeAddress: string,
-  provider: algosdk.Algodv2,
-  signer: algosdk.Account,
-  signedVAA: Uint8Array
-) {
-  const txParams = await provider.getTransactionParams().do();
-  txParams.fee = 1000;
-  txParams.flatFee = true;
-
-  const p = tokenBridgeAddress.split(":");
-  const vaaProcessorAppId = parseInt(p[1]);
-  const vaaProcessorOwner = p[0];
-
-  const { parse_vaa } = await importCoreWasm();
-
-  const parsedVAA = parse_vaa(signedVAA);
-
-  console.log(parsedVAA);
-
-  const globalState = await readAppGlobalState(
-    provider,
-    vaaProcessorAppId,
-    vaaProcessorOwner
-  );
-
-  const guardianCount = parseInt(globalStateLookupKey(globalState, "gscount"));
-  const stepSize = parseInt(globalStateLookupKey(globalState, "vssize"));
-  const numOfVerifySteps = Math.ceil(guardianCount / stepSize);
-  if (guardianCount === 0 || stepSize === 0) {
-    throw new Error(
-      "cannot get guardian count and/or step-size from global state"
-    );
+    throw new Error("key not found");
   }
 
-  // (!)
-  // Stateless programs cannot access state nor stack from stateful programs, so
-  // for the VAA Verify program to use the guardian set, we pass the global state as TX argument,
-  // (and check it against the current global list to be sure it's ok). This way it can be read by
-  // VAA verifier as a stateless program CAN DO READS of call transaction arguments in a group.
-  // The same technique is used for the note field, where the payload is set.
+  async readAppGlobalStateByKey(
+    algodClient: any,
+    appId: any,
+    accountAddr: any,
+    key: any
+  ) {
+    const accountInfoResponse = await algodClient
+      .accountInformation(accountAddr)
+      .do();
+    for (let i = 0; i < accountInfoResponse["created-apps"].length; i++) {
+      if (accountInfoResponse["created-apps"][i].id === appId) {
+        // console.log("Application's global state:")
+        const stateArray =
+          accountInfoResponse["created-apps"][i].params["global-state"];
+        for (let j = 0; j < stateArray.length; j++) {
+          const text = Buffer.from(stateArray[j].key, "base64").toString();
+
+          if (key === text) {
+            return this.appValueState(stateArray[j].value);
+          }
+        }
+      }
+    }
+    throw new Error("key not found");
+  }
+
   //
+  //// read local state of application from user account
+  //async function readAppLocalState (algodClient, appId, accountAddr) {
+  //  const accountInfoResponse = await algodClient.accountInformation(accountAddr).do()
+  //  for (let i = 0; i < accountInfoResponse['apps-local-state'].length; i++) {
+  //    if (accountInfoResponse['apps-local-state'][i].id === appId) {
+  //      // console.log(accountAddr + " opted in, local state:")
+  //
+  //      if (accountInfoResponse['apps-local-state'][i]['key-value']) {
+  //        return accountInfoResponse['apps-local-state'][i]['key-value']
+  //      }
+  //    }
+  //  }
+  //}
+  //
+  //async function readAppLocalStateByKey (algodClient, appId, accountAddr, key) {
+  //  const accountInfoResponse = await algodClient.accountInformation(accountAddr).do()
+  //  for (let i = 0; i < accountInfoResponse['apps-local-state'].length; i++) {
+  //    if (accountInfoResponse['apps-local-state'][i].id === appId) {
+  //      const stateArray = accountInfoResponse['apps-local-state'][i]['key-value']
+  //
+  //      if (!stateArray) {
+  //        return null
+  //      }
+  //      for (let j = 0; j < stateArray.length; j++) {
+  //        const text = Buffer.from(stateArray[j].key, 'base64').toString()
+  //
+  //        if (key === text) {
+  //          return appValueState(stateArray[j].value)
+  //        }
+  //      }
+  //      // not found assume 0
+  //      return 0
+  //    }
+  //  }
+  //}
+  //
+  //function uintArray8ToString (byteArray) {
+  //  return Array.from(byteArray, function (byte) {
+  //    // eslint-disable-next-line no-bitwise
+  //    return ('0' + (byte & 0xFF).toString(16)).slice(-2)
+  //  }).join('')
+  //}
+  //
+  ///**
+  // * Verify if transactionResponse has any information about a transaction local or global state change.
+  // * @param  {Object} transactionResponse object containing the transaction response of an application call
+  // * @return {Boolean} returns true if there is a local or global delta meanining that
+  // * the transaction made a change in the local or global state
+  // */
+  //function anyAppCallDelta (transactionResponse) {
+  //  return (transactionResponse['global-state-delta'] || transactionResponse['local-state-delta'])
+  //}
+  //
+  ///**
+  // * Print to stdout the changes introduced by the transaction that generated the transactionResponse if any.
+  // * @param  {Object} transactionResponse object containing the transaction response of an application call
+  // * @return {void}
+  // */
+  //function printAppCallDelta (transactionResponse) {
+  //  if (transactionResponse['global-state-delta'] !== undefined) {
+  //    console.log('Global State updated:')
+  //    printAppCallDeltaArray(transactionResponse['global-state-delta'])
+  //  }
+  //  if (transactionResponse['local-state-delta'] !== undefined) {
+  //    console.log('Local State updated:')
+  //    printAppCallDeltaArray(transactionResponse['local-state-delta'])
+  //  }
+  //}
 
-  //    try {
-  const guardianKeys = [];
-  const buf = Buffer.alloc(8);
-  for (let i = 0; i < guardianCount; i++) {
-    buf.writeBigUInt64BE(BigInt(i++));
-    guardianKeys.push(globalStateLookupKey(globalState, buf.toString()));
+  /**
+   * Helper function to wait until transaction txId is included in a block/round.
+   * @param  {String} txId transaction id to wait for
+   * @return {VOID} VOID
+   */
+  async waitForConfirmation(txId: string, algodClient: algosdk.Algodv2) {
+    const status = await algodClient.status().do();
+    let lastRound = status["last-round"];
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const pendingInfo = await algodClient
+        .pendingTransactionInformation(txId)
+        .do();
+      if (
+        pendingInfo["confirmed-round"] !== null &&
+        pendingInfo["confirmed-round"] > 0
+      ) {
+        // Got the completed Transaction
+
+        return pendingInfo;
+      }
+      lastRound += 1;
+      await algodClient.statusAfterBlock(lastRound).do();
+    }
   }
 
-  const gid = crypto.randomBytes(16).toString("hex");
-  const groupTxSet = [];
+  async publish(
+    action: string,
+    tokenBridgeAddress: string,
+    provider: algosdk.Algodv2,
+    signer: algosdk.Account,
+    signedVAA: Uint8Array
+  ) {
+    const txParams = await provider.getTransactionParams().do();
+    txParams.fee = 1000;
+    txParams.flatFee = true;
 
-  const sigSubsets = [];
+    const p = tokenBridgeAddress.split(":");
+    const vaaProcessorAppId = parseInt(p[1]);
+    const vaaProcessorOwner = p[0];
 
-  for (let i = 0; i < numOfVerifySteps; i++) {
-    const st = stepSize * i;
-    const sigSetLen = 132 * stepSize;
+    const { parse_vaa } = await importCoreWasm();
 
-    const keySubset = guardianKeys.slice(
-      st,
-      i < numOfVerifySteps - 1 ? st + stepSize : undefined
+    const parsedVAA = parse_vaa(signedVAA);
+
+    console.log(parsedVAA);
+
+    const globalState = await this.readAppGlobalState(
+      provider,
+      vaaProcessorAppId,
+      vaaProcessorOwner
     );
 
-    const signatures = signedVAA.slice(6);
-
-    sigSubsets.push(
-      signatures.slice(
-        i * sigSetLen,
-        i < numOfVerifySteps - 1 ? i * sigSetLen + sigSetLen : undefined
-      )
+    const guardianCount = parseInt(
+      this.globalStateLookupKey(globalState, "gscount")
     );
+    const stepSize = parseInt(this.globalStateLookupKey(globalState, "vssize"));
+    const numOfVerifySteps = Math.ceil(guardianCount / stepSize);
+    if (guardianCount === 0 || stepSize === 0) {
+      throw new Error(
+        "cannot get guardian count and/or step-size from global state"
+      );
+    }
+
+    console.log(1);
+
+    // (!)
+    // Stateless programs cannot access state nor stack from stateful programs, so
+    // for the VAA Verify program to use the guardian set, we pass the global state as TX argument,
+    // (and check it against the current global list to be sure it's ok). This way it can be read by
+    // VAA verifier as a stateless program CAN DO READS of call transaction arguments in a group.
+    // The same technique is used for the note field, where the payload is set.
+    //
+
+    const guardianKeys = [];
+    const buf = Buffer.alloc(8);
+    for (let i = 0; i < guardianCount; i++) {
+      buf.writeBigUInt64BE(BigInt(i++));
+      guardianKeys.push(this.globalStateLookupKey(globalState, buf.toString()));
+    }
+
+    const gid = crypto.randomBytes(16).toString("hex");
+    const groupTxSet = [];
+
+    const sigSubsets = [];
+
+    //  for (let i = 0; i < numOfVerifySteps; i++) {
+    //    const st = stepSize * i;
+    //    const sigSetLen = 132 * stepSize;
+    //
+    //    const keySubset = guardianKeys.slice(
+    //      st,
+    //      i < numOfVerifySteps - 1 ? st + stepSize : undefined
+    //    );
+    //
+    //    const signatures = signedVAA.slice(6);
+    //
+    //    sigSubsets.push(
+    //      signatures.slice(
+    //        i * sigSetLen,
+    //        i < numOfVerifySteps - 1 ? i * sigSetLen + sigSetLen : undefined
+    //      )
+    //    );
+    //
+    //    const tx = algosdk.makeApplicationNoOpTxn(
+    //      ALGO_VERIFY_HASH,
+    //      txParams,
+    //      vaaProcessorAppId,
+    //      [
+    //        new Uint8Array(Buffer.from("verify")),
+    //        new Uint8Array(Buffer.from(keySubset.join(""), "hex")),
+    //        algosdk.encodeUint64(guardianCount),
+    //      ],
+    //      undefined,
+    //      undefined,
+    //      undefined,
+    //      new Uint8Array(parsedVAA.payload)
+    //    );
+    //
+    //    groupTxSet.push(tx);
+    //  }
+
+    console.log(2);
 
     const tx = algosdk.makeApplicationNoOpTxn(
-      ALGO_VERIFY_HASH,
+      signer.addr,
       txParams,
       vaaProcessorAppId,
-      [
-        new Uint8Array(Buffer.from("verify")),
-        new Uint8Array(Buffer.from(keySubset.join(""), "hex")),
-        algosdk.encodeUint64(guardianCount),
-      ],
+      [new Uint8Array(Buffer.from(action))],
       undefined,
       undefined,
       undefined,
@@ -420,52 +444,57 @@ async function publish(
     );
 
     groupTxSet.push(tx);
-  }
 
-  const tx = algosdk.makeApplicationNoOpTxn(
-    vaaProcessorOwner,
-    txParams,
-    vaaProcessorAppId,
-    [new Uint8Array(Buffer.from(action))],
-    undefined,
-    undefined,
-    undefined,
-    new Uint8Array(parsedVAA.payload)
-  );
+    algosdk.assignGroupID(groupTxSet);
 
-  groupTxSet.push(tx);
+    console.log(3);
 
-  algosdk.assignGroupID(groupTxSet);
-  const signedGroup = [];
-  let i = 0;
-  for (const tx of groupTxSet) {
-    // All transactions except last must be signed by stateless code.
+    const signedGroup = [];
+    let i = 0;
+    for (const tx of groupTxSet) {
+      // All transactions except last must be signed by stateless code.
 
-    if (i === groupTxSet.length - 1) {
-      const txSigned = tx.signTxn(signer.sk);
-      signedGroup.push(txSigned);
-    } else {
-      const ls = Buffer.from(String(sigSubsets[i]), "hex");
-      const lsig = new algosdk.LogicSigAccount(ALGO_VERIFY, [ls]);
-      const stxn = algosdk.signLogicSigTransaction(tx, lsig);
-      signedGroup.push(stxn.blob);
+      if (i === groupTxSet.length - 1) {
+        const txSigned = tx.signTxn(signer.sk);
+        signedGroup.push(txSigned);
+      } else {
+        //      const ls = Buffer.from(String(sigSubsets[i]), "hex");
+        //      const lsig = new algosdk.LogicSigAccount(ALGO_VERIFY, [ls]);
+        //      const stxn = algosdk.signLogicSigTransaction(tx, lsig);
+        //      signedGroup.push(stxn.blob);
+      }
+      i++;
     }
-    i++;
+
+    console.log(4);
+
+    console.log(signedGroup);
+
+    try {
+      // Submit the transaction
+      const rawTx = await provider.sendRawTransaction(signedGroup).do();
+
+      console.log(5);
+
+      console.log(rawTx);
+      console.log(signedGroup);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      console.log("finally");
+    }
+    //  console.log(
+    //    await waitForConfirmation(
+    //      signedGroup[signedGroup.length - 1].get_txid(),
+    //      provider
+    //    )
+    //  );
+
+    return {};
   }
-
-  // Submit the transaction
-  const rawTx = await provider.sendRawTransaction(signedGroup).do();
-
-  console.log(rawTx);
-  console.log(
-    await waitForConfirmation(
-      signedGroup[signedGroup.length - 1].get_txid(),
-      provider
-    )
-  );
-
-  return {};
 }
+
+const alib = new AlgorandLib();
 
 export async function createWrappedOnAlgorandTxn(
   tokenBridgeAddress: string,
@@ -473,7 +502,7 @@ export async function createWrappedOnAlgorandTxn(
   signer: algosdk.Account,
   vaaBody: Uint8Array
 ) {
-  return publish(
+  return alib.publish(
     "createWrapped",
     tokenBridgeAddress,
     provider,
