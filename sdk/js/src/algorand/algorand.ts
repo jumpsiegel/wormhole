@@ -480,7 +480,7 @@ class AlgorandLib {
       console.log(signedGroup);
 
       console.log("waitForConfirmation");
-      console.log(await waitForConfirmation(tawTx, provider));
+      console.log(await this.waitForConfirmation(rawTx["txId"], provider));
       console.log("waitForConfirmationDone");
     } catch (e) {
       console.log("exception");
