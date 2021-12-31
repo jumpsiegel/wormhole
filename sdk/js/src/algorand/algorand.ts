@@ -394,41 +394,42 @@ class AlgorandLib {
 
     const sigSubsets = [];
 
-    //  for (let i = 0; i < numOfVerifySteps; i++) {
-    //    const st = stepSize * i;
-    //    const sigSetLen = 132 * stepSize;
-    //
-    //    const keySubset = guardianKeys.slice(
-    //      st,
-    //      i < numOfVerifySteps - 1 ? st + stepSize : undefined
-    //    );
-    //
-    //    const signatures = signedVAA.slice(6);
-    //
-    //    sigSubsets.push(
-    //      signatures.slice(
-    //        i * sigSetLen,
-    //        i < numOfVerifySteps - 1 ? i * sigSetLen + sigSetLen : undefined
-    //      )
-    //    );
-    //
-    //    const tx = algosdk.makeApplicationNoOpTxn(
-    //      ALGO_VERIFY_HASH,
-    //      txParams,
-    //      vaaProcessorAppId,
-    //      [
-    //        new Uint8Array(Buffer.from("verify")),
-    //        new Uint8Array(Buffer.from(keySubset.join(""), "hex")),
-    //        algosdk.encodeUint64(guardianCount),
-    //      ],
-    //      undefined,
-    //      undefined,
-    //      undefined,
-    //      new Uint8Array(parsedVAA.payload)
-    //    );
-    //
-    //    groupTxSet.push(tx);
-    //  }
+    for (let i = 0; i < numOfVerifySteps; i++) {
+      const st = stepSize * i;
+      const sigSetLen = 132 * stepSize;
+      //
+      const keySubset = guardianKeys.slice(
+        st,
+        i < numOfVerifySteps - 1 ? st + stepSize : undefined
+      );
+
+      const signatures = signedVAA.slice(6);
+
+      sigSubsets.push(
+        signatures.slice(
+          i * sigSetLen,
+          i < numOfVerifySteps - 1 ? i * sigSetLen + sigSetLen : undefined
+        )
+      );
+
+      const tx = algosdk.makeApplicationNoOpTxn(
+        this.ALGO_VERIFY_HASH,
+        txParams,
+        vaaProcessorAppId,
+        [
+        //          new Uint8Array(Buffer.from("parseAndVerifyVM")),
+          new Uint8Array(Buffer.from("nop")),
+          new Uint8Array(Buffer.from(keySubset.join(""), "hex")),
+          algosdk.encodeUint64(guardianCount),
+        ],
+        undefined,
+        undefined,
+        undefined,
+        new Uint8Array(parsedVAA.payload)
+      );
+
+      groupTxSet.push(tx);
+    }
 
     console.log(2);
 
@@ -458,10 +459,10 @@ class AlgorandLib {
         const txSigned = tx.signTxn(signer.sk);
         signedGroup.push(txSigned);
       } else {
-        //      const ls = Buffer.from(String(sigSubsets[i]), "hex");
-        //      const lsig = new algosdk.LogicSigAccount(ALGO_VERIFY, [ls]);
-        //      const stxn = algosdk.signLogicSigTransaction(tx, lsig);
-        //      signedGroup.push(stxn.blob);
+              const ls = Buffer.from(String(sigSubsets[i]), "hex");
+              const lsig = new algosdk.LogicSigAccount(this.ALGO_VERIFY, [ls]);
+              const stxn = algosdk.signLogicSigTransaction(tx, lsig);
+              signedGroup.push(stxn.blob);
       }
       i++;
     }
@@ -501,7 +502,7 @@ export async function createWrappedOnAlgorandTxn(
   signer: algosdk.Account,
   vaaBody: Uint8Array
 ) {
-  console.log("you suck")
+  console.log("you suck");
   return await alib.publish(
     "nop",
     tokenBridgeAddress,
