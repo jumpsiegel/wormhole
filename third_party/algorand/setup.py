@@ -337,6 +337,7 @@ class Setup:
         APPROVAL_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_program(), Mode.Application)
         CLEAR_STATE_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_clear(), Mode.Application)
         VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(), Mode.Signature)
+        VERIFY_NOP = self.fullyCompileContract(self.client, vaa_verify_nop(), Mode.Signature)
 
         vaa_processor_approval = APPROVAL_PROGRAM[0]
         vaa_processor_clear = CLEAR_STATE_PROGRAM[0]
@@ -402,13 +403,24 @@ class Setup:
         appCallTxn = transaction.PaymentTxn(
             sender=self.target.getAddress(),
             receiver=verify_hash,
-            amt=500000,
+            amt=100000,
             sp=suggestedParams,
         )
         signedAppCallTxn = appCallTxn.sign(self.target.getPrivateKey())
         self.client.send_transactions([signedAppCallTxn])
         response = self.waitForTransaction(self.client, appCallTxn.get_txid())
         print("funded the stateless contract")
+
+        appCallTxn = transaction.PaymentTxn(
+            sender=self.target.getAddress(),
+            receiver=VERIFY_NOP[1],
+            amt=100000,
+            sp=suggestedParams,
+        )
+        signedAppCallTxn = appCallTxn.sign(self.target.getPrivateKey())
+        self.client.send_transactions([signedAppCallTxn])
+        response = self.waitForTransaction(self.client, appCallTxn.get_txid())
+        print("funded the nop stateless contract")
 
     # helper function that formats global state for printing
     def format_state(self, state):

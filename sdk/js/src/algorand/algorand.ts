@@ -400,6 +400,9 @@ class AlgorandLib {
 
     const sigSubsets = [];
 
+    // We need to fund this critter...
+    groupTxSet.push(algosdk.makePaymentTxnWithSuggestedParams(signer.addr, this.ALGO_NOP_HASH, numOfVerifySteps * txParams.fee, undefined, undefined, txParams));
+
     for (let i = 0; i < numOfVerifySteps; i++) {
       const st = stepSize * i;
       const sigSetLen = 132 * stepSize;
@@ -459,9 +462,10 @@ class AlgorandLib {
     const signedGroup = [];
     let i = 0;
     for (const tx of groupTxSet) {
-      // All transactions except last must be signed by stateless code.
 
-      if (i === groupTxSet.length - 1) {
+      // All transactions except the first and last must be signed by stateless code.
+
+      if ((i === groupTxSet.length - 1) || (i == 0)) {
         const txSigned = tx.signTxn(signer.sk);
         signedGroup.push(txSigned);
       } else {
