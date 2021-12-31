@@ -18,9 +18,15 @@ class AlgorandLib {
   ALGORAND_ADDRESS_SIZE: number;
   ALGO_VERIFY_HASH: string;
   ALGO_VERIFY: Uint8Array;
+  ALGO_NOP_HASH: string;
+  ALGO_NOP: Uint8Array;
 
   constructor() {
     this.ALGORAND_ADDRESS_SIZE = 58;
+
+    this.ALGO_NOP_HASH =
+      "BJATCHES5YJZJ7JITYMVLSSIQAVAWBQRVGPQUDT5AZ2QSLDSXWWM46THOY";
+    this.ALGO_NOP = new Uint8Array([5, 129, 1, 67]);
 
     this.ALGO_VERIFY_HASH =
       "VHASIDAP4TUFVHYZLBINKHOXMWCKSYCEWYRAVBYSSBPZGRES7FUBY3C5PE";
@@ -413,11 +419,11 @@ class AlgorandLib {
       );
 
       const tx = algosdk.makeApplicationNoOpTxn(
-        this.ALGO_VERIFY_HASH,
+        this.ALGO_NOP_HASH,
         txParams,
         vaaProcessorAppId,
         [
-        //          new Uint8Array(Buffer.from("parseAndVerifyVM")),
+          //          new Uint8Array(Buffer.from("parseAndVerifyVM")),
           new Uint8Array(Buffer.from("nop")),
           new Uint8Array(Buffer.from(keySubset.join(""), "hex")),
           algosdk.encodeUint64(guardianCount),
@@ -459,10 +465,10 @@ class AlgorandLib {
         const txSigned = tx.signTxn(signer.sk);
         signedGroup.push(txSigned);
       } else {
-              const ls = Buffer.from(String(sigSubsets[i]), "hex");
-              const lsig = new algosdk.LogicSigAccount(this.ALGO_VERIFY, [ls]);
-              const stxn = algosdk.signLogicSigTransaction(tx, lsig);
-              signedGroup.push(stxn.blob);
+        const ls = Buffer.from(String(sigSubsets[i]), "hex");
+        const lsig = new algosdk.LogicSigAccount(this.ALGO_NOP, [ls]);
+        const stxn = algosdk.signLogicSigTransaction(tx, lsig);
+        signedGroup.push(stxn.blob);
       }
       i++;
     }

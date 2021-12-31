@@ -111,6 +111,9 @@ def vaa_verify_program():
         Approve()]
     )
 
+def vaa_verify_nop():
+    return Seq([Approve()])
+
 if __name__ == "__main__":
     outfile = "teal/wormhole/build/vaa-verify.teal"
     appid = 0

@@ -20,6 +20,7 @@ from algosdk.logic import get_application_address
 from vaa_processor import vaa_processor_program
 from vaa_processor import vaa_processor_clear
 from vaa_verify import vaa_verify_program
+from vaa_verify import vaa_verify_nop
 
 from Cryptodome.Hash import SHA512
 
@@ -315,9 +316,16 @@ class Setup:
         self.target = self.getTargetAccount()
 
         VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(), Mode.Signature)
-        print("const ALGO_VERIFY_HASH = \"%s\""%(VERIFY_PROGRAM[1]));
-        print("const ALGO_VERIFY = new Uint8Array([", end='')
+        print("this.ALGO_VERIFY_HASH = \"%s\""%(VERIFY_PROGRAM[1]));
+        print("this.ALGO_VERIFY = new Uint8Array([", end='')
         for x in VERIFY_PROGRAM[0]:
+            print("%d, "%(x), end='')
+        print("])")
+
+        VERIFY_NOP = self.fullyCompileContract(self.client, vaa_verify_nop(), Mode.Signature)
+        print("this.ALGO_NOP_HASH = \"%s\""%(VERIFY_NOP[1]));
+        print("this.ALGO_NOP = new Uint8Array([", end='')
+        for x in VERIFY_NOP[0]:
             print("%d, "%(x), end='')
         print("])")
 
