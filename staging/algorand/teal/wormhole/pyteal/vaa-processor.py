@@ -56,10 +56,7 @@ from pyteal.types import *
 from pyteal.compiler import *
 from pyteal.ir import *
 from globals import *
-from pyteal import Log
 import sys
-
-from util import itoa
 
 GUARDIAN_ADDRESS_SIZE = 20
 METHOD = Txn.application_args[0]
@@ -75,8 +72,6 @@ SLOT_VERIFIED_BITFIELD = ScratchVar(TealType.uint64, SLOTID_VERIFIED_BIT)
 SLOT_TEMP = ScratchVar(TealType.uint64, SLOTID_TEMP_0)
 
 # defined chainId/contracts
-
-ALGORAND_CHAIN_ID = 7
 
 GOVERNANCE_CHAIN_ID = 1
 GOVERNANCE_EMITTER_ID = '00000000000000000000000000000000000000000000'
@@ -224,6 +219,7 @@ def setvphash():
     #
     # Sets the hash of the verification stateless program.
     #
+
     return Seq([
         Assert(is_creator()),
         Assert(Global.group_size() == Int(1)),
@@ -247,7 +243,7 @@ def setauthid():
         Approve()
     ])
 
-def parseAndVerifyVM():
+def verify():
     # * Sender must be stateless logic.
     # * Let N be the number of signatures per verification step, for the TX(i) in group, we verify signatures [j..k] where j = i*N, k = j+(N-1)
     # * Argument 0 must contain guardian public keys for guardians [i..j] (read by stateless logic).
@@ -274,9 +270,11 @@ def parseAndVerifyVM():
         If(Txn.group_index() == Global.group_size() -
            Int(2)).Then(
             Return(Seq([
-                Assert(check_final_verification_state())
+                Assert(check_final_verification_state()),
+                commit_vaa()
             ]))),
         Approve()])
+
 
 def vaa_processor_program():
     handle_create = Return(bootstrap())
