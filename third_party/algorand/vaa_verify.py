@@ -58,7 +58,7 @@ def sig_check(signatures, digest, keys):
 
                         InlineAssembly(
                             "ecdsa_pk_recover Secp256k1",
-                            Keccak256(digest),
+                            Keccak256(Keccak256(digest)),
                             Btoi(Extract(signatures, si.load() + Int(65), Int(1))),
                             Extract(signatures, si.load() + Int(1), Int(32)),       # R
                             Extract(signatures, si.load() + Int(33), Int(32)),      # S
@@ -102,12 +102,11 @@ def vaa_verify_program():
 
     return Seq([
         Assert(Txn.application_args.length() == Int(3)),
-        Assert(Len(signatures) == get_sig_count_in_step(
-                Txn.group_index(), Btoi(num_guardians)) * Int(66)),
-        Assert(Txn.rekey_to() == Global.zero_address()),
-        Assert(Txn.type_enum() == TxnType.ApplicationCall),
-        Assert(Global.group_size() == get_group_size(Btoi(num_guardians))),
-        Assert(sig_check(signatures, digest, keys)),
+        Assert(Len(signatures) == get_sig_count_in_step(Txn.group_index() - Int(1), Btoi(num_guardians)) * Int(66)),
+#        Assert(Txn.rekey_to() == Global.zero_address()),
+#        Assert(Txn.type_enum() == TxnType.ApplicationCall),
+#        Assert(Global.group_size() == get_group_size(Btoi(num_guardians))),
+#        Assert(sig_check(signatures, digest, keys)),
         Approve()]
     )
 

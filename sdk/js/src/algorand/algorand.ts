@@ -24,28 +24,12 @@ class AlgorandLib {
   constructor() {
     this.ALGORAND_ADDRESS_SIZE = 58;
 
-    this.ALGO_NOP_HASH =
-      "BJATCHES5YJZJ7JITYMVLSSIQAVAWBQRVGPQUDT5AZ2QSLDSXWWM46THOY";
-    this.ALGO_NOP = new Uint8Array([5, 129, 1, 67]);
+this.ALGO_VERIFY_HASH = "B77RU63EJ5MLSMTKD5IGTTBU3KBVUWR2G6LFSUM5VZZ4TVXOJAX6GFTCNY"
+this.ALGO_VERIFY = new Uint8Array([5, 32, 3, 6, 1, 0, 49, 27, 129, 3, 18, 68, 45, 21, 49, 22, 35, 9, 54, 26, 2, 23, 136, 0, 44, 129, 66, 11, 18, 68, 35, 67, 53, 4, 53, 3, 52, 3, 52, 4, 24, 36, 19, 64, 0, 6, 52, 3, 52, 4, 10, 137, 52, 3, 52, 4, 10, 35, 8, 137, 53, 2, 52, 2, 34, 136, 255, 220, 137, 53, 1, 53, 0, 52, 1, 34, 24, 36, 18, 64, 0, 20, 52, 0, 52, 1, 136, 255, 227, 35, 9, 12, 64, 0, 5, 52, 1, 34, 24, 137, 34, 137, 34, 137, ])
 
-    this.ALGO_VERIFY_HASH =
-      "VHASIDAP4TUFVHYZLBINKHOXMWCKSYCEWYRAVBYSSBPZGRES7FUBY3C5PE";
-    this.ALGO_VERIFY = new Uint8Array([
-      5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 27, 129, 3, 18, 68, 45, 21,
-      49, 22, 54, 26, 2, 23, 136, 0, 76, 33, 4, 11, 18, 68, 49, 32, 50, 3, 18,
-      68, 49, 16, 35, 18, 68, 50, 4, 54, 26, 2, 23, 136, 0, 42, 18, 68, 45, 49,
-      5, 54, 26, 1, 136, 0, 75, 68, 34, 67, 53, 2, 53, 1, 52, 1, 52, 2, 24, 36,
-      19, 64, 0, 6, 52, 1, 52, 2, 10, 137, 52, 1, 52, 2, 10, 34, 8, 137, 53, 0,
-      52, 0, 35, 136, 255, 220, 137, 53, 4, 53, 3, 52, 4, 35, 24, 36, 18, 64, 0,
-      20, 52, 3, 52, 4, 136, 255, 227, 34, 9, 12, 64, 0, 5, 52, 4, 35, 24, 137,
-      35, 137, 35, 137, 53, 7, 53, 6, 53, 5, 40, 53, 240, 40, 53, 241, 36, 53,
-      10, 36, 53, 8, 36, 53, 9, 52, 8, 52, 5, 21, 12, 65, 0, 94, 52, 5, 52, 8,
-      34, 88, 23, 52, 10, 49, 22, 35, 11, 8, 18, 68, 52, 6, 2, 52, 5, 52, 8,
-      129, 65, 8, 34, 88, 23, 52, 5, 52, 8, 34, 8, 37, 88, 52, 5, 52, 8, 129,
-      33, 8, 37, 88, 7, 0, 53, 241, 53, 240, 52, 7, 52, 9, 33, 5, 88, 52, 240,
-      52, 241, 80, 2, 129, 12, 37, 82, 18, 68, 52, 8, 33, 4, 8, 53, 8, 52, 9,
-      33, 5, 8, 53, 9, 52, 10, 34, 8, 53, 10, 66, 255, 153, 34, 137,
-    ]);
+this.ALGO_NOP_HASH = "BJATCHES5YJZJ7JITYMVLSSIQAVAWBQRVGPQUDT5AZ2QSLDSXWWM46THOY"
+this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
+
   }
 
   //function timeoutPromise (ms, promise) {
@@ -401,7 +385,7 @@ class AlgorandLib {
     const sigSubsets = [];
 
     // We need to fund this critter...
-    groupTxSet.push(algosdk.makePaymentTxnWithSuggestedParams(signer.addr, this.ALGO_NOP_HASH, numOfVerifySteps * txParams.fee, undefined, undefined, txParams));
+    groupTxSet.push(algosdk.makePaymentTxnWithSuggestedParams(signer.addr, this.ALGO_VERIFY_HASH, numOfVerifySteps * txParams.fee, undefined, undefined, txParams));
 
     for (let i = 0; i < numOfVerifySteps; i++) {
       const st = stepSize * i;
@@ -412,21 +396,21 @@ class AlgorandLib {
         i < numOfVerifySteps - 1 ? st + stepSize : undefined
       );
 
-      const signatures = signedVAA.slice(6);
+ //     const signatures = signedVAA.slice(6);
 
       sigSubsets.push(
-        signatures.slice(
+          parsedVAA.signatures.slice(
           i * sigSetLen,
           i < numOfVerifySteps - 1 ? i * sigSetLen + sigSetLen : undefined
         )
       );
 
       const tx = algosdk.makeApplicationNoOpTxn(
-        this.ALGO_NOP_HASH,
+        this.ALGO_VERIFY_HASH,
         txParams,
         vaaProcessorAppId,
         [
-          //          new Uint8Array(Buffer.from("parseAndVerifyVM")),
+//            new Uint8Array(Buffer.from("parseAndVerifyVM")),
           new Uint8Array(Buffer.from("nop")),
           new Uint8Array(Buffer.from(keySubset.join(""), "hex")),
           algosdk.encodeUint64(guardianCount),
@@ -437,10 +421,17 @@ class AlgorandLib {
         new Uint8Array(parsedVAA.payload)
       );
 
+      console.log(keySubset);
+
       groupTxSet.push(tx);
     }
 
-    console.log(2);
+    console.log(guardianCount); // 1
+    console.log(numOfVerifySteps); // 1
+    console.log(stepSize) // 6
+    console.log(sigSubsets);
+    console.log(sigSubsets[0][0].signature.length);
+
 
     const tx = algosdk.makeApplicationNoOpTxn(
       signer.addr,
@@ -457,8 +448,6 @@ class AlgorandLib {
 
     algosdk.assignGroupID(groupTxSet);
 
-    console.log(3);
-
     const signedGroup = [];
     let i = 0;
     for (const tx of groupTxSet) {
@@ -469,8 +458,9 @@ class AlgorandLib {
         const txSigned = tx.signTxn(signer.sk);
         signedGroup.push(txSigned);
       } else {
-        const ls = Buffer.from(String(sigSubsets[i]), "hex");
-        const lsig = new algosdk.LogicSigAccount(this.ALGO_NOP, [ls]);
+        const ls = Buffer.from(String(sigSubsets[i-1]), "hex");
+          console.log('Buffer at %d results in sig of len %d', (i - 1), ls.length)
+        const lsig = new algosdk.LogicSigAccount(this.ALGO_VERIFY, [ls]);
         const stxn = algosdk.signLogicSigTransaction(tx, lsig);
         signedGroup.push(stxn.blob);
       }
@@ -514,6 +504,7 @@ export async function createWrappedOnAlgorandTxn(
 ) {
   console.log("you suck");
   return await alib.publish(
+//    "parseAndVerifyVM",
     "nop",
     tokenBridgeAddress,
     provider,
