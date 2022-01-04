@@ -458,7 +458,8 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
         const txSigned = tx.signTxn(signer.sk);
         signedGroup.push(txSigned);
       } else {
-        const ls = Buffer.from(String(sigSubsets[i-1]), "hex");
+          console.log(sigSubsets[i-1])
+        const ls = Buffer.from(sigSubsets[i-1], "hex");
           console.log('Buffer at %d results in sig of len %d', (i - 1), ls.length)
         const lsig = new algosdk.LogicSigAccount(this.ALGO_VERIFY, [ls]);
         const stxn = algosdk.signLogicSigTransaction(tx, lsig);
