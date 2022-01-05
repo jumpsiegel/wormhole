@@ -138,6 +138,7 @@ class Setup:
         if args.devnet:
             self.init(args)
             s.setup()
+#            s.export()
             s.devnet_deploy()
             sys.exit(0)
     
@@ -157,7 +158,9 @@ class Setup:
 
         if args.export:
             self.init(args)
+            s.setup()
             s.export()
+            s.devnet_deploy()
             sys.exit(0)
     
         if args.print:
@@ -301,7 +304,7 @@ class Setup:
         r = b64decode(response["result"])
         assert self.hashy( bytes("Program", 'utf-8') + r) == decode_address(response["hash"])
 #        return [r, decode_address(response["hash"])]
-        return [r, response["hash"]]
+        return [r, response["hash"], teal]
 
     def test_compile(self):
         self.client = self.getAlgodClient()
@@ -312,6 +315,10 @@ class Setup:
         VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(int(self.args.appid)), Mode.Signature)
 
     def export(self):
+        from vaa_processor import vaa_processor_program
+        from vaa_processor import vaa_processor_clear
+        from vaa_verify import vaa_verify_program
+
         self.client = self.getAlgodClient()
         self.target = self.getTargetAccount()
 
@@ -334,9 +341,18 @@ class Setup:
         from vaa_processor import vaa_processor_clear
         from vaa_verify import vaa_verify_program
 
+        self.client = self.getAlgodClient()
+        self.target = self.getTargetAccount()
+
         APPROVAL_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_program(), Mode.Application)
         CLEAR_STATE_PROGRAM = self.fullyCompileContract(self.client, vaa_processor_clear(), Mode.Application)
         VERIFY_PROGRAM = self.fullyCompileContract(self.client, vaa_verify_program(), Mode.Signature)
+        print("this.ALGO_VERIFY_HASH = \"%s\""%(VERIFY_PROGRAM[1]));
+        print("this.ALGO_VERIFY = new Uint8Array([", end='')
+        for x in VERIFY_PROGRAM[0]:
+            print("%d, "%(x), end='')
+        print("])")
+
         VERIFY_NOP = self.fullyCompileContract(self.client, vaa_verify_nop(), Mode.Signature)
 
         vaa_processor_approval = APPROVAL_PROGRAM[0]
@@ -409,7 +425,7 @@ class Setup:
         signedAppCallTxn = appCallTxn.sign(self.target.getPrivateKey())
         self.client.send_transactions([signedAppCallTxn])
         response = self.waitForTransaction(self.client, appCallTxn.get_txid())
-        print("funded the stateless contract")
+        print("funded the stateless contract: " + verify_hash)
 
         appCallTxn = transaction.PaymentTxn(
             sender=self.target.getAddress(),
@@ -420,7 +436,7 @@ class Setup:
         signedAppCallTxn = appCallTxn.sign(self.target.getPrivateKey())
         self.client.send_transactions([signedAppCallTxn])
         response = self.waitForTransaction(self.client, appCallTxn.get_txid())
-        print("funded the nop stateless contract")
+        print("funded the nop stateless contract: " + VERIFY_NOP[1])
 
     # helper function that formats global state for printing
     def format_state(self, state):

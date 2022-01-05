@@ -24,8 +24,8 @@ class AlgorandLib {
   constructor() {
     this.ALGORAND_ADDRESS_SIZE = 58;
 
-this.ALGO_VERIFY_HASH = "B77RU63EJ5MLSMTKD5IGTTBU3KBVUWR2G6LFSUM5VZZ4TVXOJAX6GFTCNY"
-this.ALGO_VERIFY = new Uint8Array([5, 32, 3, 6, 1, 0, 49, 27, 129, 3, 18, 68, 45, 21, 49, 22, 35, 9, 54, 26, 2, 23, 136, 0, 44, 129, 66, 11, 18, 68, 35, 67, 53, 4, 53, 3, 52, 3, 52, 4, 24, 36, 19, 64, 0, 6, 52, 3, 52, 4, 10, 137, 52, 3, 52, 4, 10, 35, 8, 137, 53, 2, 52, 2, 34, 136, 255, 220, 137, 53, 1, 53, 0, 52, 1, 34, 24, 36, 18, 64, 0, 20, 52, 0, 52, 1, 136, 255, 227, 35, 9, 12, 64, 0, 5, 52, 1, 34, 24, 137, 34, 137, 34, 137, ])
+this.ALGO_VERIFY_HASH = "CA37TBBU3IWVZFBTIYTUV7ACXH5GTP57HOSIBA7Y62AXDOSBVASBH4TLIY"
+this.ALGO_VERIFY = new Uint8Array([5, 32, 3, 6, 1, 0, 49, 27, 129, 3, 18, 68, 45, 21, 49, 22, 35, 9, 54, 26, 2, 23, 136, 0, 44, 129, 66, 11, 18, 68, 35, 67, 53, 2, 53, 1, 52, 1, 52, 2, 24, 36, 19, 64, 0, 6, 52, 1, 52, 2, 10, 137, 52, 1, 52, 2, 10, 35, 8, 137, 53, 0, 52, 0, 34, 136, 255, 220, 137, 53, 4, 53, 3, 52, 4, 34, 24, 36, 18, 64, 0, 20, 52, 3, 52, 4, 136, 255, 227, 35, 9, 12, 64, 0, 5, 52, 4, 34, 24, 137, 34, 137, 34, 137, ])
 
 this.ALGO_NOP_HASH = "BJATCHES5YJZJ7JITYMVLSSIQAVAWBQRVGPQUDT5AZ2QSLDSXWWM46THOY"
 this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
@@ -176,7 +176,12 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
   //}
   //
 
-  // read global state of application
+  async readAccountBalance(algodClient: any, accountAddr: any) {
+    const accountInfoResponse = await algodClient .accountInformation(accountAddr) .do();
+      console.log(accountInfoResponse)
+      return accountInfoResponse["amount"]
+  }
+
   async readAppGlobalState(algodClient: any, appId: any, accountAddr: any) {
     const accountInfoResponse = await algodClient
       .accountInformation(accountAddr)
@@ -383,6 +388,9 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
     const groupTxSet = [];
 
     const sigSubsets = [];
+
+      const bal = await this.readAccountBalance(provider, this.ALGO_VERIFY_HASH)
+      console.log(bal)
 
     // We need to fund this critter...
     groupTxSet.push(algosdk.makePaymentTxnWithSuggestedParams(signer.addr, this.ALGO_VERIFY_HASH, numOfVerifySteps * txParams.fee, undefined, undefined, txParams));
