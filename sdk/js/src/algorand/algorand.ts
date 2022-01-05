@@ -396,14 +396,20 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
         i < numOfVerifySteps - 1 ? st + stepSize : undefined
       );
 
- //     const signatures = signedVAA.slice(6);
+      const siglen = signedVAA.slice(5, 6)
+      const signatures = signedVAA.slice(6, 6 + siglen[0] * 66)
+      console.log(siglen);
+      console.log(signatures);
+      console.log(parsedVAA.signatures[0])
 
       sigSubsets.push(
-          parsedVAA.signatures.slice(
+          signatures.slice(
           i * sigSetLen,
           i < numOfVerifySteps - 1 ? i * sigSetLen + sigSetLen : undefined
         )
       );
+
+      console.log(sigSubsets)
 
       const tx = algosdk.makeApplicationNoOpTxn(
         this.ALGO_VERIFY_HASH,
@@ -430,8 +436,6 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
     console.log(numOfVerifySteps); // 1
     console.log(stepSize) // 6
     console.log(sigSubsets);
-    console.log(sigSubsets[0][0].signature.length);
-
 
     const tx = algosdk.makeApplicationNoOpTxn(
       signer.addr,
@@ -458,10 +462,10 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
         const txSigned = tx.signTxn(signer.sk);
         signedGroup.push(txSigned);
       } else {
-          console.log(sigSubsets[i-1])
-        const ls = Buffer.from(sigSubsets[i-1], "hex");
-          console.log('Buffer at %d results in sig of len %d', (i - 1), ls.length)
-        const lsig = new algosdk.LogicSigAccount(this.ALGO_VERIFY, [ls]);
+//          console.log(sigSubsets[i-1])
+//        const ls = Buffer.from(String(sigSubsets[i-1]), "hex");
+         console.log('Buffer at %d results in sig of len %d', (i - 1), sigSubsets[i-1].length)
+        const lsig = new algosdk.LogicSigAccount(this.ALGO_VERIFY, [sigSubsets[i-1]]);
         const stxn = algosdk.signLogicSigTransaction(tx, lsig);
         signedGroup.push(stxn.blob);
       }
