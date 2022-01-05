@@ -54,11 +54,11 @@ def sig_check(signatures, digest, keys):
                         # Index must be sequential
 
                         Assert(Btoi(Extract(signatures, si.load(), Int(1))) == 
-                             i.load() + (Txn.group_index() * Int(MAX_SIGNATURES_PER_VERIFICATION_STEP))),
+                             i.load() + ((Txn.group_index() - Int(1)) * Int(MAX_SIGNATURES_PER_VERIFICATION_STEP))),
 
                         InlineAssembly(
                             "ecdsa_pk_recover Secp256k1",
-                            Keccak256(Keccak256(digest)),
+                            Keccak256(Keccak256(digest)), # the digest in question.. :)
                             Btoi(Extract(signatures, si.load() + Int(65), Int(1))),
                             Extract(signatures, si.load() + Int(1), Int(32)),       # R
                             Extract(signatures, si.load() + Int(33), Int(32)),      # S
@@ -83,6 +83,7 @@ def sig_check(signatures, digest, keys):
             Return(Int(1))
         ]
     )
+
 
 
 """

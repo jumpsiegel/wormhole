@@ -24,8 +24,8 @@ class AlgorandLib {
   constructor() {
     this.ALGORAND_ADDRESS_SIZE = 58;
 
-this.ALGO_VERIFY_HASH = "RZ62MT2WSTNJHNUF35Y4PILF3BNFZAXYPAA47D3KNWSYUE74F2UQIKKKSA"
-this.ALGO_VERIFY = new Uint8Array([5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 27, 129, 3, 18, 68, 45, 21, 49, 22, 34, 9, 54, 26, 2, 23, 136, 0, 79, 33, 4, 11, 18, 68, 49, 32, 50, 3, 18, 68, 49, 16, 35, 18, 68, 50, 4, 129, 2, 9, 54, 26, 2, 23, 136, 0, 42, 18, 68, 45, 49, 5, 54, 26, 1, 136, 0, 75, 68, 34, 67, 53, 2, 53, 1, 52, 1, 52, 2, 24, 36, 19, 64, 0, 6, 52, 1, 52, 2, 10, 137, 52, 1, 52, 2, 10, 34, 8, 137, 53, 0, 52, 0, 35, 136, 255, 220, 137, 53, 4, 53, 3, 52, 4, 35, 24, 36, 18, 64, 0, 20, 52, 3, 52, 4, 136, 255, 227, 34, 9, 12, 64, 0, 5, 52, 4, 35, 24, 137, 35, 137, 35, 137, 53, 7, 53, 6, 53, 5, 40, 53, 240, 40, 53, 241, 36, 53, 10, 36, 53, 8, 36, 53, 9, 52, 8, 52, 5, 21, 12, 65, 0, 95, 52, 5, 52, 8, 34, 88, 23, 52, 10, 49, 22, 35, 11, 8, 18, 68, 52, 6, 2, 2, 52, 5, 52, 8, 129, 65, 8, 34, 88, 23, 52, 5, 52, 8, 34, 8, 37, 88, 52, 5, 52, 8, 129, 33, 8, 37, 88, 7, 0, 53, 241, 53, 240, 52, 7, 52, 9, 33, 5, 88, 52, 240, 52, 241, 80, 2, 129, 12, 37, 82, 18, 68, 52, 8, 33, 4, 8, 53, 8, 52, 9, 33, 5, 8, 53, 9, 52, 10, 34, 8, 53, 10, 66, 255, 152, 34, 137, ])
+this.ALGO_VERIFY_HASH = "I76O2N7WRFHTAOT3HLVFMOOBISYU7M3C4ZQJMQCAX66NYKR4PPXJOJDH4M"
+this.ALGO_VERIFY = new Uint8Array([5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 27, 129, 3, 18, 68, 45, 21, 49, 22, 34, 9, 54, 26, 2, 23, 136, 0, 79, 33, 4, 11, 18, 68, 49, 32, 50, 3, 18, 68, 49, 16, 35, 18, 68, 50, 4, 129, 2, 9, 54, 26, 2, 23, 136, 0, 42, 18, 68, 45, 49, 5, 54, 26, 1, 136, 0, 75, 68, 34, 67, 53, 2, 53, 1, 52, 1, 52, 2, 24, 36, 19, 64, 0, 6, 52, 1, 52, 2, 10, 137, 52, 1, 52, 2, 10, 34, 8, 137, 53, 0, 52, 0, 35, 136, 255, 220, 137, 53, 4, 53, 3, 52, 4, 35, 24, 36, 18, 64, 0, 20, 52, 3, 52, 4, 136, 255, 227, 34, 9, 12, 64, 0, 5, 52, 4, 35, 24, 137, 35, 137, 35, 137, 53, 7, 53, 6, 53, 5, 40, 53, 240, 40, 53, 241, 36, 53, 10, 36, 53, 8, 36, 53, 9, 52, 8, 52, 5, 21, 12, 65, 0, 97, 52, 5, 52, 8, 34, 88, 23, 52, 10, 49, 22, 34, 9, 35, 11, 8, 18, 68, 52, 6, 2, 2, 52, 5, 52, 8, 129, 65, 8, 34, 88, 23, 52, 5, 52, 8, 34, 8, 37, 88, 52, 5, 52, 8, 129, 33, 8, 37, 88, 7, 0, 53, 241, 53, 240, 52, 7, 52, 9, 33, 5, 88, 52, 240, 52, 241, 80, 2, 129, 12, 37, 82, 18, 68, 52, 8, 33, 4, 8, 53, 8, 52, 9, 33, 5, 8, 53, 9, 52, 10, 34, 8, 53, 10, 66, 255, 150, 34, 137, ])
 
 this.ALGO_NOP_HASH = "BJATCHES5YJZJ7JITYMVLSSIQAVAWBQRVGPQUDT5AZ2QSLDSXWWM46THOY"
 this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
@@ -381,7 +381,8 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
     const buf = Buffer.alloc(8);
     for (let i = 0; i < guardianCount; i++) {
       buf.writeBigUInt64BE(BigInt(i++));
-      guardianKeys.push(this.globalStateLookupKey(globalState, buf.toString()));
+        const gk = this.globalStateLookupKey(globalState, buf.toString())
+        guardianKeys.push(Buffer.from(gk, 'base64').toString('hex'))
     }
 
     const gid = crypto.randomBytes(16).toString("hex");
@@ -418,6 +419,7 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
       );
 
       console.log(sigSubsets)
+        console.log(          new Uint8Array(Buffer.from(keySubset.join(""), "hex")),)
 
       const tx = algosdk.makeApplicationNoOpTxn(
         this.ALGO_VERIFY_HASH,
@@ -444,6 +446,8 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
     console.log(numOfVerifySteps); // 1
     console.log(stepSize) // 6
     console.log(sigSubsets);
+
+      console.log(guardianKeys);
 
     const tx = algosdk.makeApplicationNoOpTxn(
       signer.addr,
