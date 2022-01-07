@@ -122,7 +122,6 @@ describe("Integration Tests", () => {
               transport: NodeHttpTransport(),
             }
           );
-          console.log(Buffer.from(signedVAA).toString('hex'))
           const provider = new Algodv2(ALGOD_TOKEN, ALGOD_SERVER, ALGOD_PORT);
           const signer = mnemonicToSecretKey(ALGOD_USER_PK);
           try {

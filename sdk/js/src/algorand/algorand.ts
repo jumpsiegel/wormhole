@@ -199,7 +199,6 @@ class AlgorandLib {
     const accountInfoResponse = await algodClient
       .accountInformation(accountAddr)
       .do();
-    console.log(accountInfoResponse);
     return accountInfoResponse["amount"];
   }
 
@@ -239,7 +238,6 @@ class AlgorandLib {
       .do();
     for (let i = 0; i < accountInfoResponse["created-apps"].length; i++) {
       if (accountInfoResponse["created-apps"][i].id === appId) {
-        // console.log("Application's global state:")
         const stateArray =
           accountInfoResponse["created-apps"][i].params["global-state"];
         for (let j = 0; j < stateArray.length; j++) {
@@ -367,9 +365,8 @@ class AlgorandLib {
 
     const { parse_vaa } = await importCoreWasm();
 
+    console.log(Buffer.from(signedVAA).toString('hex'))
     const parsedVAA = parse_vaa(signedVAA);
-
-    console.log(util.inspect(signedVAA, { maxArrayLength: null }));
     console.log(parsedVAA);
 
     const globalState = await this.readAppGlobalState(
@@ -388,8 +385,6 @@ class AlgorandLib {
         "cannot get guardian count and/or step-size from global state"
       );
     }
-
-    console.log(1);
 
     // (!)
     // Stateless programs cannot access state nor stack from stateful programs, so
@@ -412,8 +407,7 @@ class AlgorandLib {
 
     const sigSubsets = [];
 
-    const bal = await this.readAccountBalance(provider, this.ALGO_VERIFY_HASH);
-    console.log(bal);
+      // const bal = await this.readAccountBalance(provider, this.ALGO_VERIFY_HASH);
 
     // We need to fund this critter...
     groupTxSet.push(
@@ -440,19 +434,12 @@ class AlgorandLib {
         i < numOfVerifySteps - 1 ? st + stepSize : undefined
       );
 
-      console.log(siglen);
-      console.log(signatures);
-      console.log(parsedVAA.signatures[0]);
-
       sigSubsets.push(
         signatures.slice(
           i * sigSetLen,
           i < numOfVerifySteps - 1 ? i * sigSetLen + sigSetLen : undefined
         )
       );
-
-      console.log(sigSubsets);
-      console.log(new Uint8Array(Buffer.from(keySubset.join(""), "hex")));
 
       const tx = algosdk.makeApplicationNoOpTxn(
         this.ALGO_VERIFY_HASH,
@@ -470,17 +457,8 @@ class AlgorandLib {
         new Uint8Array(payload)
       );
 
-      console.log(keySubset);
-
       groupTxSet.push(tx);
     }
-
-    console.log(guardianCount); // 1
-    console.log(numOfVerifySteps); // 1
-    console.log(stepSize); // 6
-    console.log(sigSubsets);
-
-    console.log(guardianKeys);
 
     const tx = algosdk.makeApplicationNoOpTxn(
       signer.addr,
@@ -508,11 +486,6 @@ class AlgorandLib {
       } else {
         //          console.log(sigSubsets[i-1])
         //        const ls = Buffer.from(String(sigSubsets[i-1]), "hex");
-        console.log(
-          "Buffer at %d results in sig of len %d",
-          i - 1,
-          sigSubsets[i - 1].length
-        );
         const lsig = new algosdk.LogicSigAccount(this.ALGO_VERIFY, [
           sigSubsets[i - 1],
         ]);
@@ -522,22 +495,11 @@ class AlgorandLib {
       i++;
     }
 
-    console.log(4);
-
-    console.log(signedGroup);
-
     try {
       // Submit the transaction
       const rawTx = await provider.sendRawTransaction(signedGroup).do();
 
-      console.log(5);
-
-      console.log(rawTx);
-      console.log(signedGroup);
-
-      console.log("waitForConfirmation");
-      console.log(await this.waitForConfirmation(rawTx["txId"], provider));
-      console.log("waitForConfirmationDone");
+      await this.waitForConfirmation(rawTx["txId"], provider);
     } catch (e) {
       console.log("exception");
       console.log(e);
