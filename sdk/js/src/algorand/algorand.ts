@@ -363,11 +363,13 @@ class AlgorandLib {
     const vaaProcessorAppId = parseInt(p[1]);
     const vaaProcessorOwner = p[0];
 
-    const { parse_vaa } = await importCoreWasm();
 
-    console.log(Buffer.from(signedVAA).toString('hex'))
-    const parsedVAA = parse_vaa(signedVAA);
-    console.log(parsedVAA);
+      console.log(util.inspect(signedVAA, { maxArrayLength: null }));
+
+      // const { parse_vaa } = await importCoreWasm();
+      //console.log(Buffer.from(signedVAA).toString('hex'))
+      //const parsedVAA = parse_vaa(signedVAA);
+      //console.log(parsedVAA);
 
     const globalState = await this.readAppGlobalState(
       provider,
