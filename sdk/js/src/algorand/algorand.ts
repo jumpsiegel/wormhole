@@ -4,6 +4,8 @@
 
 import algosdk from "algosdk";
 
+const util = require("util");
+
 const sha512 = require("js-sha512");
 const hibase32 = require("hi-base32");
 import {
@@ -24,12 +26,29 @@ class AlgorandLib {
   constructor() {
     this.ALGORAND_ADDRESS_SIZE = 58;
 
-this.ALGO_VERIFY_HASH = "I76O2N7WRFHTAOT3HLVFMOOBISYU7M3C4ZQJMQCAX66NYKR4PPXJOJDH4M"
-this.ALGO_VERIFY = new Uint8Array([5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 27, 129, 3, 18, 68, 45, 21, 49, 22, 34, 9, 54, 26, 2, 23, 136, 0, 79, 33, 4, 11, 18, 68, 49, 32, 50, 3, 18, 68, 49, 16, 35, 18, 68, 50, 4, 129, 2, 9, 54, 26, 2, 23, 136, 0, 42, 18, 68, 45, 49, 5, 54, 26, 1, 136, 0, 75, 68, 34, 67, 53, 2, 53, 1, 52, 1, 52, 2, 24, 36, 19, 64, 0, 6, 52, 1, 52, 2, 10, 137, 52, 1, 52, 2, 10, 34, 8, 137, 53, 0, 52, 0, 35, 136, 255, 220, 137, 53, 4, 53, 3, 52, 4, 35, 24, 36, 18, 64, 0, 20, 52, 3, 52, 4, 136, 255, 227, 34, 9, 12, 64, 0, 5, 52, 4, 35, 24, 137, 35, 137, 35, 137, 53, 7, 53, 6, 53, 5, 40, 53, 240, 40, 53, 241, 36, 53, 10, 36, 53, 8, 36, 53, 9, 52, 8, 52, 5, 21, 12, 65, 0, 97, 52, 5, 52, 8, 34, 88, 23, 52, 10, 49, 22, 34, 9, 35, 11, 8, 18, 68, 52, 6, 2, 2, 52, 5, 52, 8, 129, 65, 8, 34, 88, 23, 52, 5, 52, 8, 34, 8, 37, 88, 52, 5, 52, 8, 129, 33, 8, 37, 88, 7, 0, 53, 241, 53, 240, 52, 7, 52, 9, 33, 5, 88, 52, 240, 52, 241, 80, 2, 129, 12, 37, 82, 18, 68, 52, 8, 33, 4, 8, 53, 8, 52, 9, 33, 5, 8, 53, 9, 52, 10, 34, 8, 53, 10, 66, 255, 150, 34, 137, ])
+    this.ALGO_VERIFY_HASH =
+      "I76O2N7WRFHTAOT3HLVFMOOBISYU7M3C4ZQJMQCAX66NYKR4PPXJOJDH4M";
+    this.ALGO_VERIFY = new Uint8Array([
+      5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 27, 129, 3, 18, 68, 45, 21,
+      49, 22, 34, 9, 54, 26, 2, 23, 136, 0, 79, 33, 4, 11, 18, 68, 49, 32, 50,
+      3, 18, 68, 49, 16, 35, 18, 68, 50, 4, 129, 2, 9, 54, 26, 2, 23, 136, 0,
+      42, 18, 68, 45, 49, 5, 54, 26, 1, 136, 0, 75, 68, 34, 67, 53, 2, 53, 1,
+      52, 1, 52, 2, 24, 36, 19, 64, 0, 6, 52, 1, 52, 2, 10, 137, 52, 1, 52, 2,
+      10, 34, 8, 137, 53, 0, 52, 0, 35, 136, 255, 220, 137, 53, 4, 53, 3, 52, 4,
+      35, 24, 36, 18, 64, 0, 20, 52, 3, 52, 4, 136, 255, 227, 34, 9, 12, 64, 0,
+      5, 52, 4, 35, 24, 137, 35, 137, 35, 137, 53, 7, 53, 6, 53, 5, 40, 53, 240,
+      40, 53, 241, 36, 53, 10, 36, 53, 8, 36, 53, 9, 52, 8, 52, 5, 21, 12, 65,
+      0, 97, 52, 5, 52, 8, 34, 88, 23, 52, 10, 49, 22, 34, 9, 35, 11, 8, 18, 68,
+      52, 6, 2, 2, 52, 5, 52, 8, 129, 65, 8, 34, 88, 23, 52, 5, 52, 8, 34, 8,
+      37, 88, 52, 5, 52, 8, 129, 33, 8, 37, 88, 7, 0, 53, 241, 53, 240, 52, 7,
+      52, 9, 33, 5, 88, 52, 240, 52, 241, 80, 2, 129, 12, 37, 82, 18, 68, 52, 8,
+      33, 4, 8, 53, 8, 52, 9, 33, 5, 8, 53, 9, 52, 10, 34, 8, 53, 10, 66, 255,
+      150, 34, 137,
+    ]);
 
-this.ALGO_NOP_HASH = "BJATCHES5YJZJ7JITYMVLSSIQAVAWBQRVGPQUDT5AZ2QSLDSXWWM46THOY"
-this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
-
+    this.ALGO_NOP_HASH =
+      "BJATCHES5YJZJ7JITYMVLSSIQAVAWBQRVGPQUDT5AZ2QSLDSXWWM46THOY";
+    this.ALGO_NOP = new Uint8Array([5, 129, 1, 67]);
   }
 
   //function timeoutPromise (ms, promise) {
@@ -177,9 +196,11 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
   //
 
   async readAccountBalance(algodClient: any, accountAddr: any) {
-    const accountInfoResponse = await algodClient .accountInformation(accountAddr) .do();
-      console.log(accountInfoResponse)
-      return accountInfoResponse["amount"]
+    const accountInfoResponse = await algodClient
+      .accountInformation(accountAddr)
+      .do();
+    console.log(accountInfoResponse);
+    return accountInfoResponse["amount"];
   }
 
   async readAppGlobalState(algodClient: any, appId: any, accountAddr: any) {
@@ -348,6 +369,7 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
 
     const parsedVAA = parse_vaa(signedVAA);
 
+    console.log(util.inspect(signedVAA, { maxArrayLength: null }));
     console.log(parsedVAA);
 
     const globalState = await this.readAppGlobalState(
@@ -381,8 +403,8 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
     const buf = Buffer.alloc(8);
     for (let i = 0; i < guardianCount; i++) {
       buf.writeBigUInt64BE(BigInt(i++));
-        const gk = this.globalStateLookupKey(globalState, buf.toString())
-        guardianKeys.push(Buffer.from(gk, 'base64').toString('hex'))
+      const gk = this.globalStateLookupKey(globalState, buf.toString());
+      guardianKeys.push(Buffer.from(gk, "base64").toString("hex"));
     }
 
     const gid = crypto.randomBytes(16).toString("hex");
@@ -390,43 +412,54 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
 
     const sigSubsets = [];
 
-      const bal = await this.readAccountBalance(provider, this.ALGO_VERIFY_HASH)
-      console.log(bal)
+    const bal = await this.readAccountBalance(provider, this.ALGO_VERIFY_HASH);
+    console.log(bal);
 
     // We need to fund this critter...
-    groupTxSet.push(algosdk.makePaymentTxnWithSuggestedParams(signer.addr, this.ALGO_VERIFY_HASH, numOfVerifySteps * txParams.fee, undefined, undefined, txParams));
+    groupTxSet.push(
+      algosdk.makePaymentTxnWithSuggestedParams(
+        signer.addr,
+        this.ALGO_VERIFY_HASH,
+        numOfVerifySteps * txParams.fee,
+        undefined,
+        undefined,
+        txParams
+      )
+    );
+
+    const siglen = signedVAA.slice(5, 6);
+    const payload = signedVAA.slice(6 + siglen[0] * 66);
+    const signatures = signedVAA.slice(6, 6 + siglen[0] * 66);
+    const sigSetLen = 132 * stepSize;
 
     for (let i = 0; i < numOfVerifySteps; i++) {
       const st = stepSize * i;
-      const sigSetLen = 132 * stepSize;
       //
       const keySubset = guardianKeys.slice(
         st,
         i < numOfVerifySteps - 1 ? st + stepSize : undefined
       );
 
-      const siglen = signedVAA.slice(5, 6)
-      const signatures = signedVAA.slice(6, 6 + siglen[0] * 66)
       console.log(siglen);
       console.log(signatures);
-      console.log(parsedVAA.signatures[0])
+      console.log(parsedVAA.signatures[0]);
 
       sigSubsets.push(
-          signatures.slice(
+        signatures.slice(
           i * sigSetLen,
           i < numOfVerifySteps - 1 ? i * sigSetLen + sigSetLen : undefined
         )
       );
 
-      console.log(sigSubsets)
-        console.log(          new Uint8Array(Buffer.from(keySubset.join(""), "hex")),)
+      console.log(sigSubsets);
+      console.log(new Uint8Array(Buffer.from(keySubset.join(""), "hex")));
 
       const tx = algosdk.makeApplicationNoOpTxn(
         this.ALGO_VERIFY_HASH,
         txParams,
         vaaProcessorAppId,
         [
-//            new Uint8Array(Buffer.from("parseAndVerifyVM")),
+          //            new Uint8Array(Buffer.from("parseAndVerifyVM")),
           new Uint8Array(Buffer.from("nop")),
           new Uint8Array(Buffer.from(keySubset.join(""), "hex")),
           algosdk.encodeUint64(guardianCount),
@@ -434,7 +467,7 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
         undefined,
         undefined,
         undefined,
-        new Uint8Array(parsedVAA.payload)
+        new Uint8Array(payload)
       );
 
       console.log(keySubset);
@@ -444,10 +477,10 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
 
     console.log(guardianCount); // 1
     console.log(numOfVerifySteps); // 1
-    console.log(stepSize) // 6
+    console.log(stepSize); // 6
     console.log(sigSubsets);
 
-      console.log(guardianKeys);
+    console.log(guardianKeys);
 
     const tx = algosdk.makeApplicationNoOpTxn(
       signer.addr,
@@ -457,7 +490,7 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
       undefined,
       undefined,
       undefined,
-      new Uint8Array(parsedVAA.payload)
+      new Uint8Array(payload)
     );
 
     groupTxSet.push(tx);
@@ -467,17 +500,22 @@ this.ALGO_NOP = new Uint8Array([5, 129, 1, 67, ])
     const signedGroup = [];
     let i = 0;
     for (const tx of groupTxSet) {
-
       // All transactions except the first and last must be signed by stateless code.
 
-      if ((i === groupTxSet.length - 1) || (i == 0)) {
+      if (i === groupTxSet.length - 1 || i == 0) {
         const txSigned = tx.signTxn(signer.sk);
         signedGroup.push(txSigned);
       } else {
-//          console.log(sigSubsets[i-1])
-//        const ls = Buffer.from(String(sigSubsets[i-1]), "hex");
-         console.log('Buffer at %d results in sig of len %d', (i - 1), sigSubsets[i-1].length)
-        const lsig = new algosdk.LogicSigAccount(this.ALGO_VERIFY, [sigSubsets[i-1]]);
+        //          console.log(sigSubsets[i-1])
+        //        const ls = Buffer.from(String(sigSubsets[i-1]), "hex");
+        console.log(
+          "Buffer at %d results in sig of len %d",
+          i - 1,
+          sigSubsets[i - 1].length
+        );
+        const lsig = new algosdk.LogicSigAccount(this.ALGO_VERIFY, [
+          sigSubsets[i - 1],
+        ]);
         const stxn = algosdk.signLogicSigTransaction(tx, lsig);
         signedGroup.push(stxn.blob);
       }
@@ -521,7 +559,7 @@ export async function createWrappedOnAlgorandTxn(
 ) {
   console.log("you suck");
   return await alib.publish(
-//    "parseAndVerifyVM",
+    //    "parseAndVerifyVM",
     "nop",
     tokenBridgeAddress,
     provider,

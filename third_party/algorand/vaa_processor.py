@@ -46,6 +46,7 @@ from pyteal.compiler import *
 from pyteal.ir import *
 from globals import *
 from pyteal import Log
+from inlineasm import *
 import sys
 
 from util import itoa
