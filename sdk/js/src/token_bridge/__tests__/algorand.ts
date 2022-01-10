@@ -78,50 +78,67 @@ jest.setTimeout(60000);
 // TODO: setup keypair and provider/signer before, destroy provider after
 // TODO: make the repeatable (can't attest an already attested token)
 
+function hexStringToByteArray(hexString: string) {
+    if (hexString.length % 2 !== 0) {
+        throw "Must have an even number of hex digits to convert to bytes";
+    }
+    var numBytes = hexString.length / 2;
+    var byteArray = new Uint8Array(numBytes);
+    for (var i=0; i<numBytes; i++) {
+        byteArray[i] = parseInt(hexString.substr(i*2, 2), 16);
+    }
+    return byteArray;
+}
+
 describe("Integration Tests", () => {
   describe("Solana to Algorand", () => {
     test.only("Attest Solana SPL to Algorand", (done) => {
       (async () => {
         try {
-          // create a keypair for Solana
-          const keypair = Keypair.fromSecretKey(SOLANA_PRIVATE_KEY);
-          const payerAddress = keypair.publicKey.toString();
-          // attest the test token
-          const connection = new Connection(SOLANA_HOST, "confirmed");
-          const transaction = await attestFromSolana(
-            connection,
-            SOLANA_CORE_BRIDGE_ADDRESS,
-            SOLANA_TOKEN_BRIDGE_ADDRESS,
-            payerAddress,
-            TEST_SOLANA_TOKEN
-          );
-          // sign, send, and confirm transaction
-          transaction.partialSign(keypair);
-          const txid = await connection.sendRawTransaction(
-            transaction.serialize()
-          );
-          await connection.confirmTransaction(txid);
-          const info = await connection.getTransaction(txid);
-          if (!info) {
-            throw new Error(
-              "An error occurred while fetching the transaction info"
-            );
-          }
-          // get the sequence from the logs (needed to fetch the vaa)
-          const sequence = parseSequenceFromLogSolana(info);
-          const emitterAddress = await getEmitterAddressSolana(
-            SOLANA_TOKEN_BRIDGE_ADDRESS
-          );
-          // poll until the guardian(s) witness and sign the vaa
-          const { vaaBytes: signedVAA } = await getSignedVAAWithRetry(
-            WORMHOLE_RPC_HOSTS,
-            CHAIN_ID_SOLANA,
-            emitterAddress,
-            sequence,
-            {
-              transport: NodeHttpTransport(),
-            }
-          );
+//          // create a keypair for Solana
+//          const keypair = Keypair.fromSecretKey(SOLANA_PRIVATE_KEY);
+//          const payerAddress = keypair.publicKey.toString();
+//          // attest the test token
+//          const connection = new Connection(SOLANA_HOST, "confirmed");
+//          const transaction = await attestFromSolana(
+//            connection,
+//            SOLANA_CORE_BRIDGE_ADDRESS,
+//            SOLANA_TOKEN_BRIDGE_ADDRESS,
+//            payerAddress,
+//            TEST_SOLANA_TOKEN
+//          );
+//          // sign, send, and confirm transaction
+//          transaction.partialSign(keypair);
+//          const txid = await connection.sendRawTransaction(
+//            transaction.serialize()
+//          );
+//          await connection.confirmTransaction(txid);
+//          const info = await connection.getTransaction(txid);
+//          if (!info) {
+//            throw new Error(
+//              "An error occurred while fetching the transaction info"
+//            );
+//          }
+//          // get the sequence from the logs (needed to fetch the vaa)
+//          const sequence = parseSequenceFromLogSolana(info);
+//          const emitterAddress = await getEmitterAddressSolana(
+//            SOLANA_TOKEN_BRIDGE_ADDRESS
+//          );
+//          // poll until the guardian(s) witness and sign the vaa
+//          const { vaaBytes: signedVAA } = await getSignedVAAWithRetry(
+//            WORMHOLE_RPC_HOSTS,
+//            CHAIN_ID_SOLANA,
+//            emitterAddress,
+//            sequence,
+//            {
+//              transport: NodeHttpTransport(),
+//            }
+//          );
+
+
+            const signedVAA = hexStringToByteArray("0100000000010017fa5858d0e1c87641f5e0f477fd2dec17e1ae8db0c523e196ce87af21810f571315354a17c24c282808a3e72c8f1223b3cce9a35f41ff84d41f0f3e92d384f70061d74a200000e6d20001c69a1b1a65dd336bf1df6a77afb501fc25db7fc0938cb08595a9ef473265cb4f00000000000000472002165809739240a0ac03b98440fe8985548e3aa683cd0d4d9df5b5659669faa301000109534f4c5400000000000000000000000000000000000000000000000000000000536f6c616e61205465737420546f6b656e000000000000000000000000000000")
+
+            
           const provider = new Algodv2(ALGOD_TOKEN, ALGOD_SERVER, ALGOD_PORT);
           const signer = mnemonicToSecretKey(ALGOD_USER_PK);
           try {
@@ -129,7 +146,7 @@ describe("Integration Tests", () => {
               ALGORAND_TOKEN_BRIDGE_ADDRESS,
               provider,
               signer,
-              signedVAA
+                signedVAA
             );
           } catch (e) {
             // this could fail because the token is already attested (in an unclean env)
