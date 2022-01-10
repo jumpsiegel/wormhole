@@ -128,8 +128,8 @@ def check_guardian_key_subset():
     sig_count = ScratchVar(TealType.uint64)
     idx_base = ScratchVar(TealType.uint64)
     return Seq([
-        idx_base.store(Int(MAX_SIGNATURES_PER_VERIFICATION_STEP) * Txn.group_index()),
-        sig_count.store(get_sig_count_in_step(Txn.group_index(), NUM_GUARDIANS)),
+        idx_base.store(Int(MAX_SIGNATURES_PER_VERIFICATION_STEP) * (Txn.group_index() - Int(1))),
+        sig_count.store(get_sig_count_in_step(Txn.group_index() - Int(1), NUM_GUARDIANS)),
         For(i.store(Int(0)),
             i.load() < sig_count.load(),
             i.store(i.load() + Int(1))).Do(
@@ -238,13 +238,13 @@ def parseAndVerifyVM():
 
     return Seq([
         SLOT_VERIFIED_BITFIELD.store(Int(0)),
-        Assert(Global.group_size() == get_group_size(NUM_GUARDIANS)),
+        Assert(Global.group_size() == (get_group_size(NUM_GUARDIANS) + Int(2))),
         Assert(Txn.application_args.length() == Int(3)),
         Assert(Txn.sender() == STATELESS_LOGIC_HASH),
         Assert(check_guardian_set_size()),
         Assert(check_guardian_key_subset()),
         SLOT_VERIFIED_BITFIELD.store(
-            SetBit(SLOT_VERIFIED_BITFIELD.load(), Txn.group_index(), Int(1))),
+            SetBit(SLOT_VERIFIED_BITFIELD.load(), Txn.group_index() - Int(1), Int(1))),
         If(Txn.group_index() == Global.group_size() - Int(1)).Then(
                Assert(check_final_verification_state()),
            ),

@@ -4,6 +4,23 @@
 // npm ci --prefix sdk/js
 // npm test
 
+// u32         timestamp
+// u32         nonce
+// u16         emitter_chain
+// [32]byte    emitter_address
+// u64         sequence
+// u8          consistency_level
+
+// 51 - bytes
+
+//              []byte      payload
+// u8         payload_id = 2
+// [32]byte   token_address
+// u16        token_chain
+// u8         decimals
+// [32]byte   symbol
+// [32]byte   name
+
 import algosdk from "algosdk";
 
 const util = require("util");
@@ -450,8 +467,8 @@ class AlgorandLib {
         txParams,
         vaaProcessorAppId,
         [
-          //            new Uint8Array(Buffer.from("parseAndVerifyVM")),
-          new Uint8Array(Buffer.from("nop")),
+            new Uint8Array(Buffer.from("parseAndVerifyVM")),
+            //new Uint8Array(Buffer.from("nop")),
           new Uint8Array(Buffer.from(keySubset.join(""), "hex")),
           algosdk.encodeUint64(guardianCount),
         ],
@@ -503,7 +520,7 @@ class AlgorandLib {
       // Submit the transaction
       const rawTx = await provider.sendRawTransaction(signedGroup).do();
 
-      await this.waitForConfirmation(rawTx["txId"], provider);
+        console.log(await this.waitForConfirmation(groupTxSet[1].txID(), provider));
     } catch (e) {
       console.log("exception");
       console.log(e);
