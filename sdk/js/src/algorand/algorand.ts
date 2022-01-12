@@ -1,4 +1,3 @@
-
 // https://docs.wormholenetwork.com/wormhole/existing-applications/token-bridge
 // (cd src/algorand; npx prettier --write .)
 // npm ci --prefix sdk/js
@@ -382,13 +381,12 @@ class AlgorandLib {
     const vaaProcessorAppId = parseInt(p[1]);
     const vaaProcessorOwner = p[0];
 
+    console.log(util.inspect(signedVAA, { maxArrayLength: null }));
 
-      console.log(util.inspect(signedVAA, { maxArrayLength: null }));
-
-      // const { parse_vaa } = await importCoreWasm();
-      //console.log(Buffer.from(signedVAA).toString('hex'))
-      //const parsedVAA = parse_vaa(signedVAA);
-      //console.log(parsedVAA);
+    // const { parse_vaa } = await importCoreWasm();
+    //console.log(Buffer.from(signedVAA).toString('hex'))
+    //const parsedVAA = parse_vaa(signedVAA);
+    //console.log(parsedVAA);
 
     const globalState = await this.readAppGlobalState(
       provider,
@@ -428,7 +426,7 @@ class AlgorandLib {
 
     const sigSubsets = [];
 
-      // const bal = await this.readAccountBalance(provider, this.ALGO_VERIFY_HASH);
+    // const bal = await this.readAccountBalance(provider, this.ALGO_VERIFY_HASH);
 
     // We need to fund this critter...
     groupTxSet.push(
@@ -467,8 +465,8 @@ class AlgorandLib {
         txParams,
         vaaProcessorAppId,
         [
-            new Uint8Array(Buffer.from("parseAndVerifyVM")),
-            //new Uint8Array(Buffer.from("nop")),
+          new Uint8Array(Buffer.from("parseAndVerifyVM")),
+          //new Uint8Array(Buffer.from("nop")),
           new Uint8Array(Buffer.from(keySubset.join(""), "hex")),
           algosdk.encodeUint64(guardianCount),
         ],
@@ -520,7 +518,12 @@ class AlgorandLib {
       // Submit the transaction
       const rawTx = await provider.sendRawTransaction(signedGroup).do();
 
-        console.log(await this.waitForConfirmation(groupTxSet[1].txID(), provider));
+      console.log(
+        await this.waitForConfirmation(
+          groupTxSet[groupTxSet.length - 1].txID(),
+          provider
+        )
+      );
     } catch (e) {
       console.log("exception");
       console.log(e);
@@ -540,10 +543,9 @@ export async function createWrappedOnAlgorandTxn(
   signer: algosdk.Account,
   vaaBody: Uint8Array
 ) {
-  console.log("you suck");
   return await alib.publish(
     //    "parseAndVerifyVM",
-    "nop",
+    "createWrapped",
     tokenBridgeAddress,
     provider,
     signer,

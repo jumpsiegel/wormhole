@@ -193,8 +193,9 @@ def check_final_verification_state():
     #
     i = SLOT_TEMP
     return Seq([
+        Log(Bytes("hi")),
         For(i.store(Int(1)),
-            i.load() < Global.group_size(),
+            i.load() < (Global.group_size() - Int(1)),
             i.store(i.load() + Int(1))).Do(Seq([
                 Assert(Gtxn[i.load()].type_enum() == TxnType.ApplicationCall),
                 Assert(Gtxn[i.load()].application_id() == Txn.application_id()),
@@ -239,15 +240,24 @@ def parseAndVerifyVM():
     return Seq([
         SLOT_VERIFIED_BITFIELD.store(Int(0)),
         Assert(Global.group_size() == (get_group_size(NUM_GUARDIANS) + Int(2))),
+#        Assert(Gtxn[Global.group_size() - Int(1)].type_enum() == TxnType.ApplicationCall),
+#        Assert(Gtxn[Global.group_size() - Int(1)].application_id() == AUTHORIZED_APP_ID),
         Assert(Txn.application_args.length() == Int(3)),
         Assert(Txn.sender() == STATELESS_LOGIC_HASH),
         Assert(check_guardian_set_size()),
         Assert(check_guardian_key_subset()),
         SLOT_VERIFIED_BITFIELD.store(
             SetBit(SLOT_VERIFIED_BITFIELD.load(), Txn.group_index() - Int(1), Int(1))),
-        If(Txn.group_index() == Global.group_size() - Int(1)).Then(
-               Assert(check_final_verification_state()),
-           ),
+        # The whole VAA verifier needs to be rewritten from the ground up...
+#        If(Txn.group_index() == Global.group_size() - Int(2)).Then(
+#               Assert(check_final_verification_state()),
+#           ),
+        Approve()
+    ])
+
+def createWrapped():
+    return Seq([
+        Log(Bytes("boo")),
         Approve()
     ])
 
@@ -258,6 +268,7 @@ def vaa_processor_program():
     handle_noop = Cond(
         [METHOD == Bytes("setvphash"), setvphash()],
         [METHOD == Bytes("parseAndVerifyVM"), parseAndVerifyVM()],
+        [METHOD == Bytes("createWrapped"), createWrapped()],
         [METHOD == Bytes("nop"), nop()]
     )
     return Cond(
