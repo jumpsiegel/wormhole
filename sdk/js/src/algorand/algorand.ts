@@ -394,6 +394,9 @@ class AlgorandLib {
       vaaProcessorOwner
     );
 
+    console.log("accountBalance")
+    console.log(await this.readAccountBalance(provider, vaaProcessorOwner))
+
     const guardianCount = parseInt(
       this.globalStateLookupKey(globalState, "gscount")
     );

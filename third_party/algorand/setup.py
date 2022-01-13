@@ -367,7 +367,6 @@ class Setup:
         app_args = [ bytes.fromhex("beFA429d57cD18b7F8A4d91A2da9AB4AF05d0FBe"), 86400, 0 ]
 
         ret = (self.read_global_state(self.client, self.target.getAddress(), self.args.appid))
-
         pprint.pprint(ret)
 
         if ret == {}:
@@ -442,19 +441,22 @@ class Setup:
     def format_state(self, state):
         formatted = {}
         for item in state:
-            key = item['key']
-            value = item['value']
-            formatted_key = base64.b64decode(key).decode('utf-8')
-            if value['type'] == 1:
-                # byte string
-                if formatted_key == 'voted':
-                    formatted_value = base64.b64decode(value['bytes']).decode('utf-8')
+            try:
+                key = item['key']
+                value = item['value']
+                formatted_key = base64.b64decode(key).decode('utf-8')
+                if value['type'] == 1:
+                    # byte string
+                    if formatted_key == 'voted':
+                        formatted_value = base64.b64decode(value['bytes']).decode('utf-8')
+                    else:
+                        formatted_value = value['bytes']
+                    formatted[formatted_key] = formatted_value
                 else:
-                    formatted_value = value['bytes']
-                formatted[formatted_key] = formatted_value
-            else:
-                # integer
-                formatted[formatted_key] = value['uint']
+                    # integer
+                    formatted[formatted_key] = value['uint']
+            except:
+                pass
         return formatted
     
     # helper function to read app global state

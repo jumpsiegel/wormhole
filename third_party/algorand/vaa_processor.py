@@ -255,10 +255,76 @@ def parseAndVerifyVM():
         Approve()
     ])
 
+# u8         payload_id = 2     51
+# [32]byte   token_address    52
+# u16        token_chain     84
+# u8         decimals       86
+# [32]byte   symbol     87
+# [32]byte   name       119
+
+@Subroutine(TealType.anytype)
+def global_get_else(key: TealType.bytes, default: Expr) -> Expr:
+    maybe = App.globalGetEx(Int(0), key)
+    return Seq(maybe, If(maybe.hasValue(), maybe.value(), default))
+
+@Subroutine(TealType.anytype)
+def stripByteArray(a: TealType.bytes) -> Expr:
+    i = ScratchVar(TealType.uint64)
+    return Seq(
+        [
+            For (i.store(Int(0)), i.load() < Len(a), i.store(i.load() + Int(1))).Do(
+                    If(GetByte(a, i.load()) == Int(0)).Then(Return(Extract(a, Int(0), i.load())))
+            ),
+            Return(a)
+        ])
+
 def createWrapped():
+    digest = Txn.note()
+    uid = ScratchVar()
+    i = ScratchVar(TealType.uint64)
+#    name = ScratchVar()
+    symbol = ScratchVar()
+    mine = Global.current_application_address()
+
     return Seq([
-        Log(Bytes("boo")),
+        Assert(Btoi(Extract(digest, Int(51), Int(1))) == Int(2)),
+
+        symbol.store(stripByteArray(Extract(digest, Int(87), Int(32)))),
+#        name = stripByteArray(Extract(digest, Int(119), Int(32))),
+
+        uid.store(Concat(Extract(digest, Int(52), Int(32)), Extract(digest, Int(84), Int(2)))),
+#        If (global_get_else(uid.load(), Bytes("0")) != Bytes("0")).Then(Approve()),
+
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.AssetConfig,
+                TxnField.config_asset_name: symbol.load(),
+                TxnField.config_asset_unit_name: symbol.load(),
+                TxnField.config_asset_total: Int(int(1e10)),  # Is this needed?
+                TxnField.config_asset_decimals: Btoi(Extract(digest, Int(86), Int(1))),
+                TxnField.config_asset_manager: mine,
+                TxnField.config_asset_reserve: mine,
+                TxnField.config_asset_clawback: mine,
+            }
+        ),
+        InnerTxnBuilder.Submit(),
+
+#          text: '{"message":"TransactionPool.Remember: transaction 7MLMOWAFYGIQ6R64F4WRFW5RK4CGSD7UAWM6QLYQWNPVWMJ7A3TA: logic eval error: overspend (account PQ4NBMDLREVVRUQUFX7CFEUTKEBCEJOQ5YREC6SZA4EYKOFKHO2VLDIMTQ, data {_struct:{} Status:Offline MicroAlgos:{Raw:0} RewardsBase:0 RewardedMicroAlgos:{Raw:0} VoteID:[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] SelectionID:[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] VoteFirstValid:0 VoteLastValid:0 VoteKeyDilution:0 AssetParams:map[] Assets:map[] AuthAddr:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ AppLocalStates:map[] AppParams:map[] TotalAppSchema:{_struct:{} NumUint:0 NumByteSlice:0} TotalExtraAppPages:0}, tried to spend {1000}). Details: pc=220, opcodes=global CurrentApplicationAddress\\nitxn_field ConfigAssetClawback\\nitxn_submit\\n"}\n',
+
+        App.globalPut(uid.load(), InnerTxn.created_asset_id()),
+
+        Log(Bytes("1")),
         Approve()
+
+        #
+#        Log(Extract(digest, Int(51), Int(1))),
+#        Log(Extract(digest, Int(52), Int(32))),
+#        Log(Extract(digest, Int(84), Int(2))),
+#        Log(Extract(digest, Int(86), Int(1))),
+#        Log(Extract(digest, Int(87), Int(32))),
+#        Log(Extract(digest, Int(119), Int(32))),
+#        Approve()
     ])
 
 def vaa_processor_program():
