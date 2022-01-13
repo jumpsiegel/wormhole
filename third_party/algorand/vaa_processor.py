@@ -310,7 +310,23 @@ def createWrapped():
         ),
         InnerTxnBuilder.Submit(),
 
-#          text: '{"message":"TransactionPool.Remember: transaction 7MLMOWAFYGIQ6R64F4WRFW5RK4CGSD7UAWM6QLYQWNPVWMJ7A3TA: logic eval error: overspend (account PQ4NBMDLREVVRUQUFX7CFEUTKEBCEJOQ5YREC6SZA4EYKOFKHO2VLDIMTQ, data {_struct:{} Status:Offline MicroAlgos:{Raw:0} RewardsBase:0 RewardedMicroAlgos:{Raw:0} VoteID:[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] SelectionID:[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] VoteFirstValid:0 VoteLastValid:0 VoteKeyDilution:0 AssetParams:map[] Assets:map[] AuthAddr:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ AppLocalStates:map[] AppParams:map[] TotalAppSchema:{_struct:{} NumUint:0 NumByteSlice:0} TotalExtraAppPages:0}, tried to spend {1000}). Details: pc=220, opcodes=global CurrentApplicationAddress\\nitxn_field ConfigAssetClawback\\nitxn_submit\\n"}\n',
+#          text: '{"message":"TransactionPool.Remember: transaction
+#          7MLMOWAFYGIQ6R64F4WRFW5RK4CGSD7UAWM6QLYQWNPVWMJ7A3TA: logic
+#          eval error: overspend (account
+#          PQ4NBMDLREVVRUQUFX7CFEUTKEBCEJOQ5YREC6SZA4EYKOFKHO2VLDIMTQ,
+#          data {_struct:{} Status:Offline MicroAlgos:{Raw:0}
+#          RewardsBase:0 RewardedMicroAlgos:{Raw:0} VoteID:[0 0 0 0 0
+#          0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+#          SelectionID:[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+#          0 0 0 0 0 0 0 0 0] VoteFirstValid:0 VoteLastValid:0
+#          VoteKeyDilution:0 AssetParams:map[] Assets:map[]
+#          AuthAddr:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ
+#          AppLocalStates:map[] AppParams:map[]
+#          TotalAppSchema:{_struct:{} NumUint:0 NumByteSlice:0}
+#          TotalExtraAppPages:0}, tried to spend {1000}). Details:
+#          pc=220, opcodes=global
+#          CurrentApplicationAddress\\nitxn_field
+#          ConfigAssetClawback\\nitxn_submit\\n"}\n', 
 
         App.globalPut(uid.load(), InnerTxn.created_asset_id()),
 
