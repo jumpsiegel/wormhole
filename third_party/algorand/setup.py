@@ -361,7 +361,7 @@ class Setup:
         verify_hash = VERIFY_PROGRAM[1]
         print("verify_hash " + verify_hash + " " + str(len(decode_address(verify_hash))))
 
-        globalSchema = transaction.StateSchema(num_uints=4, num_byte_slices=20)
+        globalSchema = transaction.StateSchema(num_uints=44, num_byte_slices=20)
         localSchema = transaction.StateSchema(num_uints=0, num_byte_slices=0)
     
         app_args = [ bytes.fromhex("beFA429d57cD18b7F8A4d91A2da9AB4AF05d0FBe"), 86400, 0 ]

@@ -106,7 +106,7 @@ def vaa_verify_program():
         Assert(Len(signatures) == get_sig_count_in_step(Txn.group_index() - Int(1), Btoi(num_guardians)) * Int(66)),
         Assert(Txn.rekey_to() == Global.zero_address()),
         Assert(Txn.type_enum() == TxnType.ApplicationCall),
-        Assert(Global.group_size() - Int(2) == get_group_size(Btoi(num_guardians))),
+#        Assert(Global.group_size() - Int(2) == get_group_size(Btoi(num_guardians))),
         Assert(sig_check(signatures, digest, keys)),
         Approve()]
     )
