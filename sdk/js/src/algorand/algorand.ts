@@ -368,10 +368,10 @@ this.ALGO_VERIFY = new Uint8Array([5, 32, 6, 1, 6, 0, 32, 66, 20, 38, 1, 0, 49, 
 
     console.log(util.inspect(signedVAA, { maxArrayLength: null }));
 
-    // const { parse_vaa } = await importCoreWasm();
-    //console.log(Buffer.from(signedVAA).toString('hex'))
-    //const parsedVAA = parse_vaa(signedVAA);
-    //console.log(parsedVAA);
+    const { parse_vaa } = await importCoreWasm();
+    console.log(Buffer.from(signedVAA).toString('hex'))
+    const parsedVAA = parse_vaa(signedVAA);
+    console.log(parsedVAA);
 
     const globalState = await this.readAppGlobalState(
       provider,
