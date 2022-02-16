@@ -409,6 +409,8 @@ describe("Integration Tests", () => {
               transport: NodeHttpTransport(),
             }
           );
+          console.log(Buffer.from(signedVAA).toString('hex'))
+
           expect(
             await getIsTransferCompletedEth(
               ETH_TOKEN_BRIDGE_ADDRESS,
