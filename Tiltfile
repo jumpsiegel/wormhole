@@ -347,23 +347,23 @@ if ci_tests:
     )
 
 # algorand
-k8s_yaml_with_ns("devnet/algorand.yaml")
-
-docker_build(
-    ref = "algorand",
-    context = "third_party/algorand",
-    dockerfile = "third_party/algorand/Dockerfile",
-)
-
-k8s_resource(
-    "algorand",
-    port_forwards = [
-        port_forward(4001, name = "Algorand RPC [:4001]", host = webHost),
-        port_forward(4002, name = "Algorand KMD [:4002]", host = webHost),
-    ],
-    labels = ["algorand"],
-    trigger_mode = trigger_mode,
-)
+#k8s_yaml_with_ns("devnet/algorand.yaml")
+#
+#docker_build(
+#    ref = "algorand",
+#    context = "third_party/algorand",
+#    dockerfile = "third_party/algorand/Dockerfile",
+#)
+#
+#k8s_resource(
+#    "algorand",
+#    port_forwards = [
+#        port_forward(4001, name = "Algorand RPC [:4001]", host = webHost),
+#        port_forward(4002, name = "Algorand KMD [:4002]", host = webHost),
+#    ],
+#    labels = ["algorand"],
+#    trigger_mode = trigger_mode,
+#)
 
 # e2e
 if e2e:
